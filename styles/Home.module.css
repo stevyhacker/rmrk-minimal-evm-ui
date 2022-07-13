@@ -33,6 +33,11 @@
   text-decoration: none;
 }
 
+.description a {
+  color: #0d76fc;
+  text-decoration: none;
+}
+
 .title a:hover,
 .title a:focus,
 .title a:active {
@@ -99,4 +104,17 @@
     width: 100%;
     flex-direction: column;
   }
+}
+
+.button {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background: #72affa;
+  border-radius: 12px;
+  border: none;
+}
+
+.button:hover{
+  background: #62a6ff;
 }
