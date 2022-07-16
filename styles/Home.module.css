@@ -99,6 +99,10 @@
   line-height: 1.5;
 }
 
+.nftCard {
+
+}
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;

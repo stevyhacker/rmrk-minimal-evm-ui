@@ -48,7 +48,8 @@ const moonBaseChain: Chain = {
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
-    moonRiverChain,
+    moonBaseChain,
+    // moonRiverChain,
     ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true'
       ? [moonBaseChain]
       : []),
@@ -78,7 +79,7 @@ const wagmiClient = createClient({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains}>
+      <RainbowKitProvider showRecentTransactions={true} chains={chains}>
         <Component {...pageProps} />
       </RainbowKitProvider>
     </WagmiConfig>
