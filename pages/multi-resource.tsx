@@ -6,6 +6,7 @@ import { rmrkMultiResourceContract } from "../constants"
 import {
   useAccount,
   useConnect,
+  useContract,
   useContractRead,
   useContractWrite,
   useEnsName,
@@ -22,72 +23,72 @@ import { useEffect, useState } from "react"
 import { is } from "@babel/types"
 import { tryCatch } from "rxjs/internal-compatibility"
 
-async function getOwnedNfts(signer: Signer) {
-  const multiResourceContract = new Contract(
-    rmrkMultiResourceContract.addressOrName,
-    rmrkMultiResourceContract.contractInterface,
-    signer
-  )
-  const nftSupply = await multiResourceContract.totalSupply()
-  const nfts = []
-  for (let i = 0; i < nftSupply; i++) {
-    let isOwner = false
-    try {
-      isOwner =
-        (await multiResourceContract.connect(signer).ownerOf(i)) ==
-        (await signer.getAddress())
-    } catch (error) {
-      console.log(error)
-    }
-
-    if (isOwner) {
-      nfts.push({
-        tokenId: i,
-        owner: await signer.getAddress(),
-        tokenUri: await multiResourceContract.tokenURI(i),
-      })
-    }
-  }
-  return nfts
-  // const filter = multiResourceContract.filters.Transfer(
-  //   null,
-  //   signer.getAddress()
-  // )
-  // const events = await multiResourceContract.queryFilter(filter, -10000)
-}
-
 const MultiResource: NextPage = () => {
   const provider = useProvider()
   const { data: signer, isSuccess } = useSigner()
   const { address, isConnected } = useAccount()
-
-  const {
-    data,
-    isError,
-    write: mintNft,
-  } = useContractWrite({
-    ...rmrkMultiResourceContract,
-    functionName: "mint",
-    args: [address, 1],
-  })
-
-  const { data: nftBalance = "" } = useContractRead({
-    ...rmrkMultiResourceContract,
-    functionName: "balanceOf",
-    args: address,
-  })
-
   const addRecentTransaction = useAddRecentTransaction()
+
+  async function getOwnedNfts() {
+    const nfts = []
+
+    if (signer instanceof Signer) {
+      const multiResourceContract = new Contract(
+        rmrkMultiResourceContract.addressOrName,
+        rmrkMultiResourceContract.contractInterface,
+        signer
+      )
+      const nftSupply = await multiResourceContract.totalSupply()
+      for (let i = 0; i < nftSupply; i++) {
+        let isOwner = false
+        try {
+          isOwner =
+            (await multiResourceContract.connect(signer).ownerOf(i)) ==
+            (await signer.getAddress())
+        } catch (error) {
+          console.log(error)
+        }
+        if (isOwner) {
+          nfts.push({
+            tokenId: i,
+            owner: await signer.getAddress(),
+            tokenUri: await multiResourceContract.tokenURI(i),
+          })
+        }
+      }
+    }
+    return nfts;
+  }
+
+  async function mintNft() {
+    if (signer instanceof Signer) {
+      const multiResourceContract = new Contract(
+        rmrkMultiResourceContract.addressOrName,
+        rmrkMultiResourceContract.contractInterface,
+        signer
+      )
+
+      const tx = await multiResourceContract
+        .connect(signer)
+        .mint(await signer.getAddress(), 1)
+
+      addRecentTransaction({
+        hash: tx.hash,
+        description: "Minting a new RMRK NFT",
+        confirmations: 1,
+      })
+    }
+  }
 
   const [ownedNfts, setOwnedNfts] = useState<
     { tokenId: number; owner: string; tokenUri: string }[]
   >([])
 
   useEffect(() => {
-    if (signer instanceof Signer) {
-      console.log("getting owned nfts")
-      getOwnedNfts(signer).then((nfts) => setOwnedNfts(nfts))
-    }
+    console.log("getting owned nfts")
+    getOwnedNfts().then((nfts) => {
+      setOwnedNfts(nfts)
+    })
   }, [signer])
 
   return (
@@ -111,21 +112,14 @@ const MultiResource: NextPage = () => {
 
         <button
           onClick={() => {
-            mintNft()
-            addRecentTransaction({
-              hash: "0x...",
-              description: "Minting NFT",
-              confirmations: 1,
-            })
+            mintNft().then((r) => getOwnedNfts())
           }}
           className={styles.button}
         >
           Mint NFT
         </button>
 
-        <p className={styles.description}>Your RMRK NFTs:</p>
-
-        <NftList balance={nftBalance} nfts={ownedNfts} />
+        <NftList nfts={ownedNfts} />
       </main>
 
       <footer className={styles.footer}></footer>
