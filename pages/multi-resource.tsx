@@ -5,23 +5,12 @@ import styles from "../styles/Home.module.css"
 import { rmrkMultiResourceContract } from "../constants"
 import {
   useAccount,
-  useConnect,
-  useContract,
-  useContractRead,
-  useContractWrite,
-  useEnsName,
   useProvider,
   useSigner,
 } from "wagmi"
-import { fetchSigner, InjectedConnector, Provider } from "@wagmi/core"
 import { Contract, Signer } from "ethers"
 import NftList from "./nftList"
-import { add } from "unload"
-import { forEach } from "@vanilla-extract/css/dist/declarations/src/utils"
-import { sign } from "crypto"
 import { useEffect, useState } from "react"
-import { is } from "@babel/types"
-import { tryCatch } from "rxjs/internal-compatibility"
 
 const MultiResource: NextPage = () => {
   const provider = useProvider()
@@ -75,7 +64,7 @@ const MultiResource: NextPage = () => {
       addRecentTransaction({
         hash: tx.hash,
         description: "Minting a new RMRK NFT",
-        confirmations: 1,
+        confirmations: 3,
       })
     }
   }
@@ -109,7 +98,6 @@ const MultiResource: NextPage = () => {
         <p className={styles.description}>
           Mint an NFT and attach additional resources below:
         </p>
-
         <button
           onClick={() => {
             mintNft().then((r) => getOwnedNfts())
@@ -118,6 +106,7 @@ const MultiResource: NextPage = () => {
         >
           Mint NFT
         </button>
+        <p>It might take a few minutes to show your NFTs when just minted.</p>
 
         <NftList nfts={ownedNfts} />
       </main>

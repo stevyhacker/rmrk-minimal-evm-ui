@@ -1,5 +1,6 @@
 import styles from "../styles/Home.module.css"
 import Image from "next/image"
+import Nft from "./nft"
 
 const NftList = (props: {
   nfts: { tokenId: number; owner: string; tokenUri: string }[]
@@ -10,14 +11,8 @@ const NftList = (props: {
         <h3>Your RMRK NFTs: {props.nfts.length}</h3>
         {props.nfts.map((nft, index) => {
           return (
-            <div className={styles.card} key={index}>
-              <p className={styles.description}>Token ID: {nft.tokenId}</p>
-              <Image
-                src={"https://ipfs.io/ipfs/" + nft.tokenUri}
-                width={50}
-                height={50}
-                alt={""}
-              />
+            <div key={index}>
+              <Nft tokenId={nft.tokenId} tokenUri={nft.tokenUri} />
             </div>
           )
         })}
