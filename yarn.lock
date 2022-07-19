@@ -763,6 +763,15 @@
   dependencies:
     "tslib" "^2.4.0"
 
+"@tailwindcss/typography@^0.5.4":
+  "integrity" "sha512-QEdg40EmGvE7kKoDei8zr5sf4D1pIayHj4R31bH3lX8x2BtTiR+jNejYPOkhbmy3DXgkMF9jC8xqNiGFAuL9Sg=="
+  "resolved" "https://registry.npmjs.org/@tailwindcss/typography/-/typography-0.5.4.tgz"
+  "version" "0.5.4"
+  dependencies:
+    "lodash.castarray" "^4.4.0"
+    "lodash.isplainobject" "^4.0.6"
+    "lodash.merge" "^4.6.2"
+
 "@types/bn.js@^4.11.3":
   "integrity" "sha512-pqr857jrp2kPuO9uRjZ3PwnJTjoQy+fcdxvBTvHm6dkmEL9q+hDD/2j/0ELOBPtPnS8LjCX0gI9nbl8lVkadpg=="
   "resolved" "https://registry.npmjs.org/@types/bn.js/-/bn.js-4.11.6.tgz"
@@ -3043,10 +3052,20 @@
   dependencies:
     "p-locate" "^4.1.0"
 
+"lodash.castarray@^4.4.0":
+  "integrity" "sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q=="
+  "resolved" "https://registry.npmjs.org/lodash.castarray/-/lodash.castarray-4.4.0.tgz"
+  "version" "4.4.0"
+
 "lodash.debounce@^4.0.8":
   "integrity" "sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow=="
   "resolved" "https://registry.npmjs.org/lodash.debounce/-/lodash.debounce-4.0.8.tgz"
   "version" "4.0.8"
+
+"lodash.isplainobject@^4.0.6":
+  "integrity" "sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA=="
+  "resolved" "https://registry.npmjs.org/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz"
+  "version" "4.0.6"
 
 "lodash.merge@^4.6.2":
   "integrity" "sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ=="
@@ -4045,7 +4064,7 @@
   "resolved" "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   "version" "1.0.0"
 
-"tailwindcss@^3.0", "tailwindcss@^3.1.6":
+"tailwindcss@^3.0", "tailwindcss@^3.1.6", "tailwindcss@>=3.0.0 || insiders":
   "integrity" "sha512-7skAOY56erZAFQssT1xkpk+kWt2NrO45kORlxFPXUt3CiGsVPhH1smuH5XoDH6sGPXLyBv+zgCKA2HWBsgCytg=="
   "resolved" "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.1.6.tgz"
   "version" "3.1.6"

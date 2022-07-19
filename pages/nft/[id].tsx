@@ -18,7 +18,7 @@ const MultiResourceNft = () => {
   const [tokenUri, setTokenUri] = useState<string>("")
   const [collectionName, setCollectionName] = useState<string>("")
   const [resources, setResources] = useState<string[]>([])
-  const [tokenResources, setTokenResources] = useState<string[]>([])
+  const [pendingResources, setPendingResources] = useState<string[]>([])
   const [allResourcesData, setAllResourcesData] = useState<string[]>([])
   const [tokenResourcesData, setTokenResourcesData] = useState<string[]>([])
   const multiResourceContract = new Contract(
@@ -33,7 +33,7 @@ const MultiResourceNft = () => {
       fetchNft().then((nft) => {
         setCollectionName(nft.name)
         setResources(nft.allResources)
-        setTokenResources(nft.tokenResources)
+        setPendingResources(nft.pendingResources)
         setTokenUri(nft.tokenUri)
       })
   }, [id])
@@ -42,21 +42,21 @@ const MultiResourceNft = () => {
     const name: string = await multiResourceContract.name()
     const tokenUri: string = await multiResourceContract.tokenURI(id)
     const allResources: string[] = await multiResourceContract.getAllResources()
-    const tokenResources: string[] =
-      await multiResourceContract.getFullResources(id)
+    const pendingResources: string[] =
+      await multiResourceContract.getPendingResources(id)
     const allData: string[] = []
     const tokenData: string[] = []
     for (const r of allResources) {
       const resourceData = await multiResourceContract.getResource(r)
       allData.push(resourceData[1])
     }
-    for (const r of tokenResources) {
+    for (const r of pendingResources) {
       const resourceData = await multiResourceContract.getResource(r)
       tokenData.push(resourceData[1])
     }
     setAllResourcesData(allData)
     setTokenResourcesData(tokenData)
-    return { name, allResources, tokenResources, tokenUri }
+    return { name, allResources, pendingResources, tokenUri }
   }
 
   async function addResource() {
@@ -107,41 +107,21 @@ const MultiResourceNft = () => {
       <ConnectButton />
 
       <h4 className={styles.description}>Collection name: {collectionName}</h4>
-      <h5> Collection Resources:</h5>
-      {resources.map((resource, index) => {
-        return (
-          <div className={styles.card} key={index}>
-            <p>Resource {resource + ""}</p>
-            <code>{allResourcesData[index] + ""}</code>
-            <Image
-              src={"https://ipfs.io/ipfs/" + allResourcesData[index]}
-              width={100}
-              height={100}
-              alt={""}
-            />
-            <button
-              className="btn btn-secondary ml-2 "
-              onClick={() => {
-                addResourceToToken(index).then(() => fetchNft())
-              }}
-            >
-              Add resource to token
-            </button>
-          </div>
-        )
-      })}
-
-      <div className={styles.card}>
+      <div className={styles.nft}>
         <p className={styles.description}>Token ID: {id}</p>
         <Image
           src={"https://ipfs.io/ipfs/" + tokenUri}
-          width={120}
-          height={120}
+          width={50}
+          height={50}
           alt={""}
         />
         <div>
-          <h5> Token Resources:</h5>
-          {tokenResources.map((resource, index) => {
+          <h1 className="text-center text-xl"> Token Active Resources:</h1>
+          <h1 className="text-center text-xl mt-5">
+            {" "}
+            Token Pending Resources:
+          </h1>
+          {pendingResources.map((resource, index) => {
             return (
               <div className={styles.card} key={index}>
                 <p>Resource {resource + ""}</p>
@@ -166,6 +146,29 @@ const MultiResourceNft = () => {
         </div>
       </div>
 
+      <p className="text-center text-2xl mt-10">NFT Collection Resources:</p>
+      {resources.map((resource, index) => {
+        return (
+          <div className={styles.card} key={index}>
+            <p>Resource {resource + ""}</p>
+            <code>{allResourcesData[index] + ""}</code>
+            <Image
+              src={"https://ipfs.io/ipfs/" + allResourcesData[index]}
+              width={100}
+              height={100}
+              alt={""}
+            />
+            <button
+              className="btn btn-secondary ml-2 "
+              onClick={() => {
+                addResourceToToken(index).then(() => fetchNft())
+              }}
+            >
+              Add resource to token
+            </button>
+          </div>
+        )
+      })}
       <input
         inputMode="text"
         placeholder="metadataURI"
