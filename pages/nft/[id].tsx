@@ -2,7 +2,6 @@ import { useRouter } from "next/router"
 import styles from "../../styles/Home.module.css"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
-import { Button, List, TextField } from "@mui/material"
 import { Contract, Signer } from "ethers"
 import { rmrkMultiResourceContract } from "../../constants"
 import { useProvider, useSigner } from "wagmi"
@@ -89,7 +88,7 @@ const MultiResourceNft = () => {
         height={120}
         alt={""}
       />
-      <List>
+      <div>
         {resources.map((resource, index) => {
           return (
             <div className={styles.card} key={index}>
@@ -97,35 +96,36 @@ const MultiResourceNft = () => {
               <code>{allResourcesData[index] + ""}</code>
               <Image
                 src={"https://ipfs.io/ipfs/" + allResourcesData[index]}
-                width={80}
-                height={80}
+                width={100}
+                height={100}
                 alt={""}
               />
-              <Button
+              <button className="btn btn-secondary ml-2 "
                 onClick={() => {
                   rejectResource(index).then(() => fetchNft())
                 }}
               >
                 Reject Resource
-              </Button>
+              </button>
             </div>
           )
         })}
-      </List>
-      <TextField
-        inputMode={"text"}
+      </div>
+      <input
+        inputMode="text"
         placeholder="metadataURI"
+        className="input input-bordered w-full max-w-xs"
         value={resourceInput}
         onChange={handleResourceInput}
-      ></TextField>
-      <Button
+      ></input>
+      <button className="btn btn-primary mt-2"
         onClick={() => {
           addResource().then(() => fetchNft())
         }}
       >
         Add New Resource
-      </Button>
-      <p>Has to be Owner of the collection to add new resources!</p>
+      </button>
+      <p className="mt-4">Has to be Owner of the collection to add new resources!</p>
     </main>
   )
 }

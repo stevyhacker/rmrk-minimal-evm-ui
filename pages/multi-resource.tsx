@@ -102,7 +102,7 @@ const MultiResource: NextPage = () => {
           onClick={() => {
             mintNft().then((r) => getOwnedNfts())
           }}
-          className={styles.button}
+          className="btn btn-lg glass btn-active btn-primary"
         >
           Mint NFT
         </button>

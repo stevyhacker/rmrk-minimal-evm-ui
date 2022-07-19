@@ -78,7 +78,7 @@
   border: 1px solid #eaeaea;
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
-  max-width: 350px;
+  max-width: 500px;
 }
 
 .card:hover,
@@ -99,26 +99,10 @@
   line-height: 1.5;
 }
 
-.nftCard {
-
-}
 
 @media (max-width: 600px) {
   .grid {
     width: 100%;
     flex-direction: column;
   }
-}
-
-.button {
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: bold;
-  background: #72affa;
-  border-radius: 12px;
-  border: none;
-}
-
-.button:hover{
-  background: #62a6ff;
 }
