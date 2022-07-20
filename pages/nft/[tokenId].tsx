@@ -75,6 +75,7 @@ const MultiResourceNft = () => {
     if (signer instanceof Signer) {
       const tx = await multiResourceContract
         .connect(signer) //TODO FIXME add auto incrementing IDs to resources in Multi Resource factory
+        //resource IDs are randomized for now as a temporary solution
         .addResourceEntry(Math.floor(Math.random() * 999999), resourceInput, [])
       addRecentTransaction({
         hash: tx.hash,
@@ -133,9 +134,16 @@ const MultiResourceNft = () => {
 
       <h4 className={styles.description}>Collection name: {collectionName}</h4>
       <ul className="mt-1">Usage Notes:</ul>
-      <li>You have to be the Owner of the NFT to accept or reject a resource</li>
-      <li>You have to be the Owner of the NFT Collection to add new resources</li>
-      <li>If you are not authorized like above the transactions will be reverted</li>
+      <li>
+        You have to be the Owner of the NFT or Approved to accept or reject a
+        resource
+      </li>
+      <li>
+        You have to be the Owner of the NFT Collection to add new resources
+      </li>
+      <li>
+        If you are not authorized like above the transactions will be reverted
+      </li>
       <div className={styles.nft}>
         <p>Token ID: {tokenId}</p>
         <Image
@@ -149,8 +157,10 @@ const MultiResourceNft = () => {
           {activeResources.map((resource, index) => {
             return (
               <div className={styles.card} key={index}>
-                <p>Resource {resource + ""}</p>
-                <code>{activeResourcesData[index] + ""}</code>
+                <p>Resource ID: {resource + ""}</p>
+                <code className="text-sm">
+                  {activeResourcesData[index] + ""}
+                </code>
                 <Image
                   src={"https://ipfs.io/ipfs/" + activeResourcesData[index]}
                   width={100}
@@ -164,30 +174,34 @@ const MultiResourceNft = () => {
           {pendingResources.map((resource, index) => {
             return (
               <div className={styles.card} key={index}>
-                <p>Resource {resource + ""}</p>
-                <code>{pendingResourcesData[index] + ""}</code>
+                <p>Resource ID: {resource + ""}</p>
+                <code className="text-sm">
+                  {pendingResourcesData[index] + ""}
+                </code>
                 <Image
                   src={"https://ipfs.io/ipfs/" + pendingResourcesData[index]}
                   width={100}
                   height={100}
                   alt={""}
                 />
-                <button
-                  className="btn btn-primary ml-2 "
-                  onClick={() => {
-                    acceptResource(index).then(() => fetchNft())
-                  }}
-                >
-                  Accept Resource
-                </button>
-                <button
-                  className="btn btn-secondary ml-1"
-                  onClick={() => {
-                    rejectResource(index).then(() => fetchNft())
-                  }}
-                >
-                  Reject Resource
-                </button>
+                <div>
+                  <button
+                    className="btn btn-primary ml-2 "
+                    onClick={() => {
+                      acceptResource(index).then(() => fetchNft())
+                    }}
+                  >
+                    Accept Resource
+                  </button>
+                  <button
+                    className="btn btn-secondary ml-1"
+                    onClick={() => {
+                      rejectResource(index).then(() => fetchNft())
+                    }}
+                  >
+                    Reject Resource
+                  </button>
+                </div>
               </div>
             )
           })}
@@ -198,22 +212,48 @@ const MultiResourceNft = () => {
       {resources.map((resource, index) => {
         return (
           <div className={styles.card} key={index}>
-            <p>Resource {resource + ""}</p>
-            <code>{allResourcesData[index] + ""}</code>
+            <p>Resource ID: {resource + ""}</p>
+            <code className="text-sm">{allResourcesData[index] + ""}</code>
             <Image
               src={"https://ipfs.io/ipfs/" + allResourcesData[index]}
               width={100}
               height={100}
               alt={""}
             />
-            <button
-              className="btn btn-secondary ml-2 "
-              onClick={() => {
-                addResourceToToken(index).then(() => fetchNft())
-              }}
-            >
-              Add resource to token
-            </button>
+            <div className="">
+              <button
+                className="btn btn-primary btn-sm ml-2 "
+                onClick={() => {
+                  addResourceToToken(index).then(() => fetchNft())
+                }}
+              >
+                Add resource to token
+              </button>
+              <button
+                onClick={() => {
+                  addCustomData(index).then(() => fetchNft())
+                }}
+                className="btn btn-primary btn-sm m-1"
+              >
+                Add custom data
+              </button>
+              <button
+                onClick={() => {
+                  setCustomData(index).then(() => fetchNft())
+                }}
+                className="btn btn-secondary btn-sm m-1"
+              >
+                Set custom data
+              </button>
+              <button
+                onClick={() => {
+                  removeCustomData(index).then(() => fetchNft())
+                }}
+                className="btn btn-secondary btn-sm m-1"
+              >
+                Remove custom data
+              </button>
+            </div>
           </div>
         )
       })}
