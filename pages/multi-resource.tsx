@@ -95,18 +95,19 @@ const MultiResource: NextPage = () => {
         <ConnectButton />
 
         <h1 className={styles.title}>Multi-resource Demo</h1>
-        <p className={styles.description}>
-          Mint an NFT and attach additional resources below:
+        <p className="mb-5">
+          Mint an NFT to be able to attach multiple resources to it:
         </p>
         <button
           onClick={() => {
             mintNft().then((r) => getOwnedNfts())
           }}
-          className="btn btn-lg glass btn-active btn-primary"
+          className="btn btn-wide btn-primary"
         >
           Mint NFT
         </button>
-        <p>It might take a few minutes to show your NFTs when just minted.</p>
+        <p className="mt-5">It might take a few minutes to show your NFTs when just minted.</p>
+        <p className="mb-5">Click on the NFT card to open resource management page.</p>
 
         <NftList nfts={ownedNfts} />
       </main>

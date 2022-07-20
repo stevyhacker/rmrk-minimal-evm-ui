@@ -230,25 +230,25 @@ const MultiResourceNft = () => {
                 Add resource to token
               </button>
               <button
-                onClick={() => {
-                  addCustomData(index).then(() => fetchNft())
-                }}
+                // onClick={() => {
+                //   addCustomData(index).then(() => fetchNft())
+                // }}
                 className="btn btn-primary btn-sm m-1"
               >
                 Add custom data
               </button>
               <button
-                onClick={() => {
-                  setCustomData(index).then(() => fetchNft())
-                }}
+                // onClick={() => {
+                //   setCustomData(index).then(() => fetchNft())
+                // }}
                 className="btn btn-secondary btn-sm m-1"
               >
                 Set custom data
               </button>
               <button
-                onClick={() => {
-                  removeCustomData(index).then(() => fetchNft())
-                }}
+                // onClick={() => {
+                //   removeCustomData(index).then(() => fetchNft())
+                // }}
                 className="btn btn-secondary btn-sm m-1"
               >
                 Remove custom data

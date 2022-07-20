@@ -1,5 +1,4 @@
 import styles from "../styles/Home.module.css"
-import Image from "next/image"
 import Nft from "./nft"
 
 const NftList = (props: {
@@ -8,8 +7,8 @@ const NftList = (props: {
   return (
     <div className={styles.grid}>
       <div className={styles.container}>
-        <h3>Your RMRK NFTs: {props.nfts.length}</h3>
-        {props.nfts.map((nft, index) => {
+        <h3>Your RMRK NFTs: {props.nfts?.length}</h3>
+        {props.nfts?.map((nft, index) => {
           return (
             <div key={index}>
               <Nft tokenId={nft.tokenId} tokenUri={nft.tokenUri} />
