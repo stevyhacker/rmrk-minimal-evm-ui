@@ -2,12 +2,11 @@ import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import type { NextPage } from "next"
 import Head from "next/head"
 import styles from "../styles/Home.module.css"
-import { rmrkMultiResourceContract } from "../constants"
 import {
-  useAccount,
-  useProvider,
-  useSigner,
-} from "wagmi"
+  rmrkMultiResourceContract,
+  RMRKMultiResourceImplContractAddress,
+} from "../constants"
+import { useAccount, useProvider, useSigner } from "wagmi"
 import { Contract, Signer } from "ethers"
 import NftList from "./nftList"
 import { useEffect, useState } from "react"
@@ -46,7 +45,7 @@ const MultiResource: NextPage = () => {
         }
       }
     }
-    return nfts;
+    return nfts
   }
 
   async function mintNft() {
@@ -106,8 +105,25 @@ const MultiResource: NextPage = () => {
         >
           Mint NFT
         </button>
-        <p className="mt-5">It might take a few minutes to show your NFTs when just minted.</p>
-        <p className="mb-5">Click on the NFT card to open resource management page.</p>
+        <p className="mt-5">
+          RMRK NFT Contract is deployed on the Moonbase Alpha testnet.{" "}
+        </p>
+        <code className="text-sm text-gray-500 hover:text-blue-500">
+          <a
+            href={
+              "https://moonbase.moonscan.io/address/" +
+              RMRKMultiResourceImplContractAddress
+            }
+          >
+            {RMRKMultiResourceImplContractAddress}
+          </a>
+        </code>
+        <p className="mt-5">
+          It might take a few minutes to show your NFTs when just minted.
+        </p>
+        <p className="mb-5">
+          Click on the NFT card to open resource management page.
+        </p>
 
         <NftList nfts={ownedNfts} />
       </main>
