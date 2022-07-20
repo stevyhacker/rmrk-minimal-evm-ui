@@ -56,7 +56,7 @@
 }
 
 .description {
-  margin: 0 0 2rem;
+  margin: 1rem 0 2rem;
   line-height: 1.5;
   font-size: 1.5rem;
 }
@@ -84,7 +84,7 @@
 .nft {
   margin: 1rem;
   padding: 1.5rem;
-  text-align: left;
+  text-align: center;
   color: inherit;
   text-decoration: none;
   border: 1px solid #eaeaea;
@@ -96,7 +96,7 @@
 .card:hover,
 .card:focus,
 .card:active {
-  color: #0d76fc;
+  /*color: #0d76fc;*/
   border-color: #0d76fc;
 }
 
