@@ -6,6 +6,7 @@ import { Contract, Signer } from "ethers"
 import { rmrkMultiResourceContract } from "../../constants"
 import { useProvider, useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
+import Resource from "./Resource"
 
 const MultiResourceNft = () => {
   const provider = useProvider()
@@ -55,15 +56,15 @@ const MultiResourceNft = () => {
     const activeResourcesData: string[] = []
     for (const r of allResources) {
       const resourceData = await multiResourceContract.getResource(r)
-      allData.push(resourceData[1])
+      allData.push(resourceData)
     }
     for (const r of pendingResources) {
       const resourceData = await multiResourceContract.getResource(r)
-      pendingResourcesData.push(resourceData[1])
+      pendingResourcesData.push(resourceData)
     }
     for (const r of activeResources) {
       const resourceData = await multiResourceContract.getResource(r)
-      activeResourcesData.push(resourceData[1])
+      activeResourcesData.push(resourceData)
     }
     setAllResourcesData(allData)
     setPendingResourcesData(pendingResourcesData)
@@ -124,6 +125,20 @@ const MultiResourceNft = () => {
     }
   }
 
+  async function addCustomData() {
+    //TODO pass resourceId and customResourceId through the modal here
+    if (signer instanceof Signer) {
+      // const tx = await multiResourceContract
+      //   .connect(signer)
+      //   .addCustomDataToResource(resourceId, customResourceId)
+      // addRecentTransaction({
+      //   hash: tx.hash,
+      //   description: "Adding a custom data to resource",
+      //   confirmations: 1,
+      // })
+    }
+  }
+
   function handleResourceInput(e: React.ChangeEvent<HTMLInputElement>) {
     setResourceInput(e.target.value)
   }
@@ -156,16 +171,12 @@ const MultiResourceNft = () => {
           <h1 className="text-center text-xl mt-5"> Token Active Resources:</h1>
           {activeResources.map((resource, index) => {
             return (
-              <div className={styles.card} key={index}>
-                <p>Resource ID: {resource + ""}</p>
-                <code className="text-sm">
-                  {activeResourcesData[index] + ""}
-                </code>
-                <Image
-                  src={"https://ipfs.io/ipfs/" + activeResourcesData[index]}
-                  width={100}
-                  height={100}
-                  alt={""}
+              <div key={index} className={styles.card}>
+                <Resource
+                  key={index}
+                  resource={resource}
+                  strings={activeResourcesData}
+                  index={index}
                 />
               </div>
             )
@@ -173,35 +184,29 @@ const MultiResourceNft = () => {
           <h1 className="text-center text-xl mt-5">Token Pending Resources:</h1>
           {pendingResources.map((resource, index) => {
             return (
-              <div className={styles.card} key={index}>
-                <p>Resource ID: {resource + ""}</p>
-                <code className="text-sm">
-                  {pendingResourcesData[index] + ""}
-                </code>
-                <Image
-                  src={"https://ipfs.io/ipfs/" + pendingResourcesData[index]}
-                  width={100}
-                  height={100}
-                  alt={""}
+              <div key={index} className={styles.card}>
+                <Resource
+                  key={index}
+                  resource={resource}
+                  strings={pendingResourcesData}
+                  index={index}
                 />
-                <div>
-                  <button
-                    className="btn btn-primary ml-2 "
-                    onClick={() => {
-                      acceptResource(index).then(() => fetchNft())
-                    }}
-                  >
-                    Accept Resource
-                  </button>
-                  <button
-                    className="btn btn-secondary ml-1"
-                    onClick={() => {
-                      rejectResource(index).then(() => fetchNft())
-                    }}
-                  >
-                    Reject Resource
-                  </button>
-                </div>
+                <button
+                  className="btn btn-primary ml-2 "
+                  onClick={() => {
+                    acceptResource(index).then(() => fetchNft())
+                  }}
+                >
+                  Accept Resource
+                </button>
+                <button
+                  className="btn btn-secondary ml-1"
+                  onClick={() => {
+                    rejectResource(index).then(() => fetchNft())
+                  }}
+                >
+                  Reject Resource
+                </button>
               </div>
             )
           })}
@@ -211,49 +216,45 @@ const MultiResourceNft = () => {
       <p className="text-center text-2xl mt-10">NFT Collection Resources:</p>
       {resources.map((resource, index) => {
         return (
-          <div className={styles.card} key={index}>
-            <p>Resource ID: {resource + ""}</p>
-            <code className="text-sm">{allResourcesData[index] + ""}</code>
-            <Image
-              src={"https://ipfs.io/ipfs/" + allResourcesData[index]}
-              width={100}
-              height={100}
-              alt={""}
+          <div key={index} className={styles.card}>
+            <Resource
+              key={index}
+              resource={resource}
+              strings={allResourcesData}
+              index={index}
             />
-            <div className="">
-              <button
-                className="btn btn-primary btn-sm ml-2 "
-                onClick={() => {
-                  addResourceToToken(index).then(() => fetchNft())
-                }}
-              >
-                Add resource to token
-              </button>
-              <button
-                // onClick={() => {
-                //   addCustomData(index).then(() => fetchNft())
-                // }}
-                className="btn btn-primary btn-sm m-1"
-              >
-                Add custom data
-              </button>
-              <button
-                // onClick={() => {
-                //   setCustomData(index).then(() => fetchNft())
-                // }}
-                className="btn btn-secondary btn-sm m-1"
-              >
-                Set custom data
-              </button>
-              <button
-                // onClick={() => {
-                //   removeCustomData(index).then(() => fetchNft())
-                // }}
-                className="btn btn-secondary btn-sm m-1"
-              >
-                Remove custom data
-              </button>
-            </div>
+            <button
+              className="btn btn-primary btn-sm ml-2 "
+              onClick={() => {
+                addResourceToToken(index).then(() => fetchNft())
+              }}
+            >
+              Add resource to token
+            </button>
+            <button
+              // onClick={() => {
+              //   addCustomData(index).then(() => fetchNft())
+              // }}
+              className="btn btn-primary btn-sm m-1"
+            >
+              Add custom data
+            </button>
+            <button
+              // onClick={() => {
+              //   setCustomData(index).then(() => fetchNft())
+              // }}
+              className="btn btn-secondary btn-sm m-1"
+            >
+              Set custom data
+            </button>
+            <button
+              // onClick={() => {
+              //   removeCustomData(index).then(() => fetchNft())
+              // }}
+              className="btn btn-secondary btn-sm m-1"
+            >
+              Remove custom data
+            </button>
           </div>
         )
       })}
@@ -272,6 +273,35 @@ const MultiResourceNft = () => {
       >
         Add New Resource
       </button>
+
+      <input
+        type="checkbox"
+        id="add-custom-data-modal"
+        className="modal-toggle"
+      />
+      <div className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Add Custom Data</h3>
+          <input
+            inputMode="text"
+            placeholder="custom data"
+            className="input input-bordered w-full max-w-xs mt-5"
+            value={resourceInput}
+            onChange={handleResourceInput}
+          ></input>
+          <div className="modal-action">
+            <label
+              htmlFor="add-custom-data-modal"
+              onClick={() => {
+                addCustomData().then(() => fetchNft())
+              }}
+              className="btn btn-primary"
+            >
+              Save
+            </label>
+          </div>
+        </div>
+      </div>
     </main>
   )
 }
