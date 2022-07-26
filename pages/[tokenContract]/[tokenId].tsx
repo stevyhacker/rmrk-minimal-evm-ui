@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react"
 import { Contract, Signer } from "ethers"
 import { useProvider, useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
-import Resource from "./Resource"
+import Resource from "../../components/resource"
 import { rmrkMultiResourceContract } from "../../constants"
 
 const MultiResourceNft = () => {

@@ -5,7 +5,7 @@ import styles from "../styles/Home.module.css"
 import { rmrkFactoryContract, rmrkMultiResourceContract } from "../constants"
 import { useAccount, useProvider, useSigner } from "wagmi"
 import { Contract, Signer } from "ethers"
-import NftList from "./nftList"
+import NftList from "./nft-list"
 import React, { useEffect, useState } from "react"
 import Image from "next/image"
 
