@@ -2,6 +2,7 @@ import styles from "../styles/Home.module.css"
 import Nft from "./nft"
 
 const NftList = (props: {
+  tokenContract: string
   nfts: { tokenId: number; owner: string; tokenUri: string }[]
 }) => {
   return (
@@ -11,7 +12,11 @@ const NftList = (props: {
         {props.nfts?.map((nft, index) => {
           return (
             <div key={index}>
-              <Nft tokenId={nft.tokenId} tokenUri={nft.tokenUri} />
+              <Nft
+                tokenContract={props.tokenContract}
+                tokenId={nft.tokenId}
+                tokenUri={nft.tokenUri}
+              />
             </div>
           )
         })}
