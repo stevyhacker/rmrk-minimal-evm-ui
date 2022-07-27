@@ -260,8 +260,8 @@ const MultiResourceNft = () => {
       })}
       <input
         inputMode="text"
-        placeholder="metadataURI"
-        className="input input-bordered w-full max-w-xs"
+        placeholder="Resource metadata URI"
+        className="input input-bordered w-full max-w-xs mt-4 mb-2"
         value={resourceInput}
         onChange={handleResourceInput}
       ></input>

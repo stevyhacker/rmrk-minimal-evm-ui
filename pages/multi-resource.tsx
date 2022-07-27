@@ -8,6 +8,7 @@ import { Contract, Signer } from "ethers"
 import NftList from "./nft-list"
 import React, { useEffect, useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 
 const MultiResource: NextPage = () => {
   const provider = useProvider()
@@ -21,6 +22,9 @@ const MultiResource: NextPage = () => {
   const [symbolInput, setSymbolInput] = useState<string>("TEST")
   const [maxSupplyInput, setSupplyInput] = useState<number>(10000)
   const [priceInput, setPriceInput] = useState<number>(0)
+  const [ownedNfts, setOwnedNfts] = useState<
+    { tokenId: number; owner: string; tokenUri: string }[]
+  >([])
 
   function handleNameInput(e: React.ChangeEvent<HTMLInputElement>) {
     setNameInput(e.target.value)
@@ -146,10 +150,6 @@ const MultiResource: NextPage = () => {
     }
   }
 
-  const [ownedNfts, setOwnedNfts] = useState<
-    { tokenId: number; owner: string; tokenUri: string }[]
-  >([])
-
   useEffect(() => {
     console.log("Loading chain data")
     queryCollections().then((r) => {})
@@ -242,8 +242,10 @@ const MultiResource: NextPage = () => {
             <p className="mb-2">Select which one do you want to use:</p>
             {rmrkCollections?.map((contract, index) => {
               return (
-                <div key={index} className="hover:bg-accent-content/5">
-                  <div className="card-compact m-1" />
+                <div
+                  key={index}
+                  className="card-compact hover:bg-accent-content/5"
+                >
                   <input
                     type="radio"
                     name="radio-contract"
@@ -252,7 +254,9 @@ const MultiResource: NextPage = () => {
                     onChange={handleContractSelection}
                   />
 
-                  <code className="mx-2">{contract}</code>
+                  <Link href={"/contract/" + contract}>
+                    <code className="mx-2 hover:underline">{contract}</code>
+                  </Link>
                   <a href={"https://moonbase.moonscan.io/address/" + contract}>
                     <Image
                       alt="logo"
