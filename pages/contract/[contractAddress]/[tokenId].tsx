@@ -1,12 +1,12 @@
 import { useRouter } from "next/router"
-import styles from "../../styles/Home.module.css"
+import styles from "../../../styles/Home.module.css"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 import { Contract, Signer } from "ethers"
 import { useProvider, useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
-import Resource from "../../components/resource"
-import { rmrkMultiResourceContract } from "../../constants"
+import Resource from "../../../components/resource"
+import { rmrkMultiResourceContract } from "../../../constants"
 
 const MultiResourceNft = () => {
   const provider = useProvider()
@@ -14,7 +14,7 @@ const MultiResourceNft = () => {
   const addRecentTransaction = useAddRecentTransaction()
   let multiResourceContract: Contract
   const router = useRouter()
-  const { tokenContract, tokenId } = router.query
+  const { contractAddress, tokenId } = router.query
   const [resourceInput, setResourceInput] = useState<string>("")
   const [tokenUri, setTokenUri] = useState<string>("")
   const [collectionName, setCollectionName] = useState<string>("")
@@ -26,7 +26,7 @@ const MultiResourceNft = () => {
   const [pendingResourcesData, setPendingResourcesData] = useState<string[]>([])
 
   useEffect(() => {
-    console.log("getting [tokenContract] data" + " for token id: " + tokenId)
+    console.log("getting [contractAddress] data" + " for token id: " + tokenId)
     if (Number(tokenId) >= 0) {
       fetchNft().then((nft) => {
         setCollectionName(nft.name)
@@ -40,7 +40,7 @@ const MultiResourceNft = () => {
 
   async function fetchNft() {
     multiResourceContract = new Contract(
-      tokenContract as string,
+      contractAddress as string,
       rmrkMultiResourceContract.contractInterface,
       provider
     )
