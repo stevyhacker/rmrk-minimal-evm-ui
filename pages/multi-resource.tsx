@@ -35,11 +35,11 @@ const MultiResource: NextPage = () => {
   }
 
   function handleMaxSupplyInput(e: React.ChangeEvent<HTMLInputElement>) {
-    setSupplyInput(e.target.valueAsNumber)
+    setSupplyInput(Number(e.target.value))
   }
 
   function handlePriceInput(e: React.ChangeEvent<HTMLInputElement>) {
-    setPriceInput(e.target.valueAsNumber)
+    setPriceInput(Number(e.target.value))
   }
 
   function handleContractSelection(e: React.ChangeEvent<HTMLInputElement>) {
