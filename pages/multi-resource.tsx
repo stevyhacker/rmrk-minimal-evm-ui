@@ -2,7 +2,7 @@ import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import type { NextPage } from "next"
 import Head from "next/head"
 import styles from "../styles/Home.module.css"
-import { rmrkFactoryContract, rmrkMultiResourceContract } from "../constants"
+import { multiResourceFactoryContract, rmrkMultiResourceContract } from "../constants"
 import { useAccount, useProvider, useSigner } from "wagmi"
 import { Contract, Signer } from "ethers"
 import NftList from "./nft-list"
@@ -100,8 +100,8 @@ const MultiResource: NextPage = () => {
   async function deployNft() {
     if (signer instanceof Signer) {
       const factoryContract = new Contract(
-        rmrkFactoryContract.addressOrName,
-        rmrkFactoryContract.contractInterface,
+        multiResourceFactoryContract.addressOrName,
+        multiResourceFactoryContract.contractInterface,
         signer
       )
 
@@ -128,8 +128,8 @@ const MultiResource: NextPage = () => {
   async function queryCollections() {
     if (signer instanceof Signer) {
       const factoryContract = new Contract(
-        rmrkFactoryContract.addressOrName,
-        rmrkFactoryContract.contractInterface,
+        multiResourceFactoryContract.addressOrName,
+        multiResourceFactoryContract.contractInterface,
         signer
       )
 
