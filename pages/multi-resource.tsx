@@ -2,7 +2,10 @@ import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import type { NextPage } from "next"
 import Head from "next/head"
 import styles from "../styles/Home.module.css"
-import { multiResourceFactoryContract, rmrkMultiResourceContract } from "../constants"
+import {
+  multiResourceFactoryContract,
+  rmrkMultiResourceContract,
+} from "../constants"
 import { useAccount, useProvider, useSigner } from "wagmi"
 import { Contract, Signer } from "ethers"
 import NftList from "./nft-list"
@@ -85,9 +88,12 @@ const MultiResource: NextPage = () => {
         signer
       )
 
+      const options = {
+        value: multiResourceContract.pricePerMint(),
+      }
       const tx = await multiResourceContract
         .connect(signer)
-        .mint(await signer.getAddress(), 1)
+        .mint(await signer.getAddress(), 1, options)
 
       addRecentTransaction({
         hash: tx.hash,

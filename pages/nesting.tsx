@@ -86,9 +86,12 @@ const Nesting: NextPage = () => {
         signer
       )
 
+      const options = {
+        value: nestingContract.pricePerMint(),
+      }
       const tx = await nestingContract
         .connect(signer)
-        .mint(await signer.getAddress(), 1)
+        .mint(await signer.getAddress(), 1, options)
 
       addRecentTransaction({
         hash: tx.hash,

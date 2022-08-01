@@ -51,6 +51,7 @@ const MultiResourceNftCollection: NextPage = () => {
         allData.push(resourceData)
       }
       setAllResourcesData(allData)
+      setResources(allResources)
       setCollectionName(name)
     }
   }
@@ -97,9 +98,12 @@ const MultiResourceNftCollection: NextPage = () => {
         signer
       )
 
+      const options = {
+        value: multiResourceContract.pricePerMint(),
+      }
       const tx = await multiResourceContract
         .connect(signer)
-        .mint(await signer.getAddress(), 1)
+        .mint(await signer.getAddress(), 1, options)
 
       addRecentTransaction({
         hash: tx.hash,
