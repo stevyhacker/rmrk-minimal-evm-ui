@@ -18,6 +18,7 @@ const Nesting: NextPage = () => {
   const addRecentTransaction = useAddRecentTransaction()
   let nestingContract: Contract
   const [currentRmrkDeployment, setCurrentRmrkDeployment] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(true)
   const [rmrkCollections, setRmrkCollections] = useState<string[]>([])
   const [nameInput, setNameInput] = useState<string>("Test Collection")
   const [symbolInput, setSymbolInput] = useState<string>("TEST")
@@ -151,7 +152,10 @@ const Nesting: NextPage = () => {
 
   useEffect(() => {
     console.log("Loading chain data")
-    queryCollections().then((r) => {})
+    setLoading(true)
+    queryCollections().then((r) => {
+      setLoading(false)
+    })
     if (currentRmrkDeployment.length > 0)
       getOwnedNfts().then((nfts) => {
         setOwnedNfts(nfts)
@@ -291,6 +295,7 @@ const Nesting: NextPage = () => {
             <NftList nfts={ownedNfts} tokenContract={currentRmrkDeployment} />
           </>
         )}
+        {loading && <progress className="progress mt-2 w-72"></progress>}
       </main>
 
       <footer className={styles.footer}></footer>

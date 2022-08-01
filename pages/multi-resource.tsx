@@ -21,6 +21,7 @@ const MultiResource: NextPage = () => {
   let multiResourceContract: Contract
   const [currentRmrkDeployment, setCurrentRmrkDeployment] = useState<string>("")
   const [rmrkCollections, setRmrkCollections] = useState<string[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [nameInput, setNameInput] = useState<string>("Test Collection")
   const [symbolInput, setSymbolInput] = useState<string>("TEST")
   const [maxSupplyInput, setSupplyInput] = useState<number>(10000)
@@ -158,7 +159,10 @@ const MultiResource: NextPage = () => {
 
   useEffect(() => {
     console.log("Loading chain data")
-    queryCollections().then((r) => {})
+    setLoading(true)
+    queryCollections().then((r) => {
+      setLoading(false)
+    })
     if (currentRmrkDeployment.length > 0)
       getOwnedNfts().then((nfts) => {
         setOwnedNfts(nfts)
@@ -299,6 +303,7 @@ const MultiResource: NextPage = () => {
             <NftList nfts={ownedNfts} tokenContract={currentRmrkDeployment} />
           </>
         )}
+        {loading && <progress className="progress mt-2 w-72"></progress>}
       </main>
 
       <footer className={styles.footer}></footer>
