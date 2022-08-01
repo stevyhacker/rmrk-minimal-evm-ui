@@ -150,8 +150,7 @@ const Nesting: NextPage = () => {
     }
   }
 
-  useEffect(() => {
-    console.log("Loading chain data")
+  function fetchData() {
     setLoading(true)
     queryCollections().then((r) => {
       setLoading(false)
@@ -160,6 +159,11 @@ const Nesting: NextPage = () => {
       getOwnedNfts().then((nfts) => {
         setOwnedNfts(nfts)
       })
+  }
+
+  useEffect(() => {
+    console.log("Loading chain data")
+    fetchData()
   }, [signer, currentRmrkDeployment])
 
   return (
@@ -227,7 +231,7 @@ const Nesting: NextPage = () => {
 
         <button
           onClick={() => {
-            deployNft().then((r) => getOwnedNfts())
+            deployNft().then((r) => fetchData())
           }}
           className="btn btn-wide btn-primary"
         >

@@ -2,13 +2,13 @@ import NftList from "../nft-list"
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/router"
 import { Contract, ethers, Signer } from "ethers"
-import { rmrkMultiResourceContract } from "../../constants"
 import { useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import { NextPage } from "next"
 import styles from "../../styles/Home.module.css"
 import Head from "next/head"
 import Resource from "../../components/resource"
+import abis from "../../abis/abis"
 
 const MultiResourceNftCollection: NextPage = () => {
   const router = useRouter()
@@ -27,6 +27,7 @@ const MultiResourceNftCollection: NextPage = () => {
 
   useEffect(() => {
     console.log("Loading chain data")
+    console.log(currentRmrkDeployment)
     if (ethers.utils.isAddress(contractAddress as string)) {
       setCurrentRmrkDeployment(contractAddress as string)
       getOwnedNfts().then((nfts) => {
@@ -39,7 +40,7 @@ const MultiResourceNftCollection: NextPage = () => {
     if (signer instanceof Signer) {
       multiResourceContract = new Contract(
         contractAddress as string,
-        rmrkMultiResourceContract.contractInterface,
+        abis.multiResourceAbi,
         signer
       )
       const name: string = await multiResourceContract.name()
@@ -65,7 +66,7 @@ const MultiResourceNftCollection: NextPage = () => {
     ) {
       multiResourceContract = new Contract(
         currentRmrkDeployment,
-        rmrkMultiResourceContract.contractInterface,
+        abis.multiResourceAbi,
         signer
       )
       const nftSupply = await multiResourceContract.totalSupply()
@@ -91,10 +92,13 @@ const MultiResourceNftCollection: NextPage = () => {
   }
 
   async function mintNft() {
-    if (signer instanceof Signer) {
+    if (
+      signer instanceof Signer &&
+      ethers.utils.isAddress(currentRmrkDeployment)
+    ) {
       multiResourceContract = new Contract(
         currentRmrkDeployment,
-        rmrkMultiResourceContract.contractInterface,
+        abis.multiResourceAbi,
         signer
       )
 
@@ -115,6 +119,11 @@ const MultiResourceNftCollection: NextPage = () => {
 
   async function addResource() {
     if (signer instanceof Signer) {
+      multiResourceContract = new Contract(
+        currentRmrkDeployment,
+        abis.multiResourceAbi,
+        signer
+      )
       const tx = await multiResourceContract
         .connect(signer) //TODO FIXME add auto incrementing IDs to resources in Multi Resource factory
         //resource IDs are randomized for now as a temporary solution

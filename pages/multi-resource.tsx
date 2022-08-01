@@ -157,9 +157,7 @@ const MultiResource: NextPage = () => {
     }
   }
 
-  useEffect(() => {
-    console.log("Loading chain data")
-    setLoading(true)
+  function fetchData() {
     queryCollections().then((r) => {
       setLoading(false)
     })
@@ -167,6 +165,12 @@ const MultiResource: NextPage = () => {
       getOwnedNfts().then((nfts) => {
         setOwnedNfts(nfts)
       })
+  }
+
+  useEffect(() => {
+    console.log("Loading chain data")
+    setLoading(true)
+    fetchData()
   }, [signer, currentRmrkDeployment])
 
   return (
@@ -235,7 +239,7 @@ const MultiResource: NextPage = () => {
 
         <button
           onClick={() => {
-            deployNft().then((r) => getOwnedNfts())
+            deployNft().then((r) => fetchData())
           }}
           className="btn btn-wide btn-primary"
         >
@@ -288,7 +292,7 @@ const MultiResource: NextPage = () => {
             </p>
             <button
               onClick={() => {
-                mintNft().then((r) => getOwnedNfts())
+                mintNft().then((r) => fetchData())
               }}
               className="btn btn-wide btn-primary"
             >
