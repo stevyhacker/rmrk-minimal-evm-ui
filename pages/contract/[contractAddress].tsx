@@ -21,6 +21,7 @@ const MultiResourceNftCollection: NextPage = () => {
   const [resources, setResources] = useState<string[]>([])
   const [resourceInput, setResourceInput] = useState<string>("")
   const [collectionName, setCollectionName] = useState<string>("")
+  const [isOwner, setIsOwner] = useState<boolean>(false)
   const [ownedNfts, setOwnedNfts] = useState<
     { tokenId: number; owner: string; tokenUri: string }[]
   >([])
@@ -68,6 +69,9 @@ const MultiResourceNftCollection: NextPage = () => {
         currentRmrkDeployment,
         abis.multiResourceAbi,
         signer
+      )
+      setIsOwner(
+        (await multiResourceContract.owner()) == (await signer.getAddress())
       )
       const nftSupply = await multiResourceContract.totalSupply()
       for (let i = 0; i < nftSupply; i++) {
@@ -197,21 +201,25 @@ const MultiResourceNftCollection: NextPage = () => {
             </div>
           )
         })}
-        <input
-          inputMode="text"
-          placeholder="Resource metadata URI"
-          className="input input-bordered w-full max-w-xs mt-4 mb-2"
-          value={resourceInput}
-          onChange={handleResourceInput}
-        ></input>
-        <button
-          className="btn btn-primary mt-2"
-          onClick={() => {
-            addResource().then(() => fetchNftCollection())
-          }}
-        >
-          Add New Resource
-        </button>
+        {isOwner && (
+          <>
+            <input
+              inputMode="text"
+              placeholder="Resource metadata URI"
+              className="input input-bordered w-full max-w-xs mt-4 mb-2"
+              value={resourceInput}
+              onChange={handleResourceInput}
+            ></input>
+            <button
+              className="btn btn-primary mt-2"
+              onClick={() => {
+                addResource().then(() => fetchNftCollection())
+              }}
+            >
+              Add New Resource
+            </button>
+          </>
+        )}
       </main>
       <footer className={styles.footer}></footer>
     </div>

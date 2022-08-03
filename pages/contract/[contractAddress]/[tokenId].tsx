@@ -125,7 +125,7 @@ const MultiResourceNft = () => {
     }
   }
 
-  async function addCustomData() {
+  async function setCustomData(id : number) {
     //TODO pass resourceId and customResourceId through the modal here
     if (signer instanceof Signer) {
       // const tx = await multiResourceContract
@@ -240,9 +240,9 @@ const MultiResourceNft = () => {
               Add custom data
             </button>
             <button
-              // onClick={() => {
-              //   setCustomData(index).then(() => fetchNft())
-              // }}
+              onClick={() => {
+                setCustomData(index).then(() => fetchNft())
+              }}
               className="btn btn-secondary btn-sm m-1"
             >
               Set custom data
@@ -293,7 +293,7 @@ const MultiResourceNft = () => {
             <label
               htmlFor="add-custom-data-modal"
               onClick={() => {
-                addCustomData().then(() => fetchNft())
+                // addCustomData().then(() => fetchNft())
               }}
               className="btn btn-primary"
             >

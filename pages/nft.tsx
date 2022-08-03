@@ -9,9 +9,12 @@ const Nft = (props: {
 }) => {
   return (
     <Link
-      href={`${encodeURIComponent(props.tokenContract)}/${encodeURIComponent(
-        props.tokenId
-      )}`}
+      href={
+        "//contract/" +
+        `${encodeURIComponent(props.tokenContract)}/${encodeURIComponent(
+          props.tokenId
+        )}`
+      }
     >
       <div className={styles.card}>
         <p className={styles.description}>Token ID: {props.tokenId}</p>
