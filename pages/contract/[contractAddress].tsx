@@ -31,6 +31,7 @@ const MultiResourceNftCollection: NextPage = () => {
     console.log(currentRmrkDeployment)
     if (ethers.utils.isAddress(contractAddress as string)) {
       setCurrentRmrkDeployment(contractAddress as string)
+      fetchNftCollection().then(() => {})
       getOwnedNfts().then((nfts) => {
         setOwnedNfts(nfts)
       })
