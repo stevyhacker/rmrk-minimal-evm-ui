@@ -1,18 +1,11 @@
 
 import abis from './abis/abis';
 
-export const RMRKMultiResourceImplContractAddress = '0xB77520a5D97CAF7DEBC5AF7A28C19c49F063B4A5';
-export const RMRKMultiResourceFactoryContractAddress = '0xB2A7dB4056452e09afD94a497333F64B5f55569e';
-export const RMRKNestingFactoryContractAddress = '0xAf8445e05998E000d7fCB5CAD71734364499Bc99';
+export const RMRKMultiResourceFactoryContractAddress = '0xE4554eC79fA96e31f08bDBD2673BBA75A3DE1a6C';
+export const RMRKNestingFactoryContractAddress = '0xF74C56bEC934Bf6b816b556d0Ad17d8F1279d070';
 
 //Moonscan MR https://moonbase.moonscan.io/address/0xB77520a5D97CAF7DEBC5AF7A28C19c49F063B4A5
 //Moonscan Nesting https://moonbase.moonscan.io/address/0xd0c004801Af669857Bf0241235b7cBC3897F5932
-
-export const rmrkMultiResourceContract = {
-  addressOrName: RMRKMultiResourceImplContractAddress,
-  contractInterface: abis.multiResourceAbi,
-};
-
 
 export const multiResourceFactoryContract = {
   addressOrName: RMRKMultiResourceFactoryContractAddress,

@@ -129,9 +129,8 @@ const MultiResourceNftCollection: NextPage = () => {
         signer
       )
       const tx = await multiResourceContract
-        .connect(signer) //TODO FIXME add auto incrementing IDs to resources in Multi Resource factory
-        //resource IDs are randomized for now as a temporary solution
-        .addResourceEntry(Math.floor(Math.random() * 999999), resourceInput, [])
+        .connect(signer)
+        .addResourceEntry(resourceInput)
       addRecentTransaction({
         hash: tx.hash,
         description: "Adding a new resource to collection",

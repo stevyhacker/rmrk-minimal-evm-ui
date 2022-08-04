@@ -3,7 +3,7 @@ import type { NextPage } from "next"
 import Head from "next/head"
 import styles from "../styles/Home.module.css"
 import { nestingFactoryContract } from "../constants"
-import { useAccount, useProvider, useSigner } from "wagmi"
+import { useAccount, useContract, useProvider, useSigner } from "wagmi"
 import { Contract, Signer } from "ethers"
 import NftList from "./nft-list"
 import React, { useEffect, useState } from "react"
@@ -27,6 +27,10 @@ const Nesting: NextPage = () => {
   const [ownedNfts, setOwnedNfts] = useState<
     { tokenId: number; owner: string; tokenUri: string }[]
   >([])
+  const factoryContract = useContract({
+    ...nestingFactoryContract,
+    signerOrProvider: signer,
+  })
 
   function handleNameInput(e: React.ChangeEvent<HTMLInputElement>) {
     setNameInput(e.target.value)
@@ -104,12 +108,6 @@ const Nesting: NextPage = () => {
 
   async function deployNft() {
     if (signer instanceof Signer) {
-      const factoryContract = new Contract(
-        nestingFactoryContract.addressOrName,
-        nestingFactoryContract.contractInterface,
-        signer
-      )
-
       const tx = await factoryContract
         .connect(signer)
         .deployRMRKNesting(nameInput, symbolInput, maxSupplyInput, priceInput)
@@ -127,12 +125,6 @@ const Nesting: NextPage = () => {
 
   async function queryCollections() {
     if (signer instanceof Signer) {
-      const factoryContract = new Contract(
-        nestingFactoryContract.addressOrName,
-        nestingFactoryContract.contractInterface,
-        signer
-      )
-
       let fromBlock = 2550593 // contract creation block
       const events = await factoryContract.queryFilter(
         factoryContract.filters.NewRMRKNestingContract(
@@ -143,9 +135,7 @@ const Nesting: NextPage = () => {
         "latest"
       )
       let collections: string[] = []
-      events.map((e) => {
-        collections.push(e.args?.[0])
-      })
+      events.map((e: { args: string[] }) => collections.push(e.args?.[0]))
       setRmrkCollections(collections)
     }
   }

@@ -21,12 +21,12 @@ export default function Resource(props: {
         alt={""}
       />
       <br />
-      {props.strings[props.index][2].length>0 && (
-        <div>
-          <p className="text-sm mt-1">Custom data:</p>
-          <code className="text-sm">{props.strings[props.index][2] + ""}</code>
-        </div>
-      )}
+      {/*{props.strings[props.index][2].length>0 && (*/}
+      {/*  <div>*/}
+      {/*    <p className="text-sm mt-1">Custom data:</p>*/}
+      {/*    <code className="text-sm">{props.strings[props.index][2] + ""}</code>*/}
+      {/*  </div>*/}
+      {/*)}*/}
     </div>
   )
 }

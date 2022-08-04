@@ -2,23 +2,20 @@ import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import type { NextPage } from "next"
 import Head from "next/head"
 import styles from "../styles/Home.module.css"
-import {
-  multiResourceFactoryContract,
-  rmrkMultiResourceContract,
-} from "../constants"
-import { useAccount, useProvider, useSigner } from "wagmi"
+import { useAccount, useContract, useProvider, useSigner } from "wagmi"
 import { Contract, Signer } from "ethers"
 import NftList from "./nft-list"
 import React, { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import abis from "../abis/abis"
+import { RMRKMultiResourceFactoryContractAddress } from "../constants"
 
 const MultiResource: NextPage = () => {
   const provider = useProvider()
   const { data: signer, isSuccess } = useSigner()
   const { address, isConnected } = useAccount()
   const addRecentTransaction = useAddRecentTransaction()
-  let multiResourceContract: Contract
   const [currentRmrkDeployment, setCurrentRmrkDeployment] = useState<string>("")
   const [rmrkCollections, setRmrkCollections] = useState<string[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -29,6 +26,11 @@ const MultiResource: NextPage = () => {
   const [ownedNfts, setOwnedNfts] = useState<
     { tokenId: number; owner: string; tokenUri: string }[]
   >([])
+  const factoryContract = useContract({
+    addressOrName: RMRKMultiResourceFactoryContractAddress,
+    contractInterface: abis.multiResourceFactoryAbi,
+    signerOrProvider: signer,
+  })
 
   function handleNameInput(e: React.ChangeEvent<HTMLInputElement>) {
     setNameInput(e.target.value)
@@ -54,9 +56,9 @@ const MultiResource: NextPage = () => {
     const nfts = []
 
     if (signer instanceof Signer) {
-      multiResourceContract = new Contract(
+      const multiResourceContract = new Contract(
         currentRmrkDeployment,
-        rmrkMultiResourceContract.contractInterface,
+        abis.multiResourceAbi,
         signer
       )
       const nftSupply = await multiResourceContract.totalSupply()
@@ -83,9 +85,9 @@ const MultiResource: NextPage = () => {
 
   async function mintNft() {
     if (signer instanceof Signer) {
-      multiResourceContract = new Contract(
+      const multiResourceContract = new Contract(
         currentRmrkDeployment,
-        rmrkMultiResourceContract.contractInterface,
+        abis.multiResourceAbi,
         signer
       )
 
@@ -106,12 +108,6 @@ const MultiResource: NextPage = () => {
 
   async function deployNft() {
     if (signer instanceof Signer) {
-      const factoryContract = new Contract(
-        multiResourceFactoryContract.addressOrName,
-        multiResourceFactoryContract.contractInterface,
-        signer
-      )
-
       const tx = await factoryContract
         .connect(signer)
         .deployRMRKMultiResource(
@@ -134,12 +130,6 @@ const MultiResource: NextPage = () => {
 
   async function queryCollections() {
     if (signer instanceof Signer) {
-      const factoryContract = new Contract(
-        multiResourceFactoryContract.addressOrName,
-        multiResourceFactoryContract.contractInterface,
-        signer
-      )
-
       let fromBlock = 2550593 // contract creation block
       const events = await factoryContract.queryFilter(
         factoryContract.filters.NewRMRKMultiResourceContract(
@@ -150,7 +140,7 @@ const MultiResource: NextPage = () => {
         "latest"
       )
       let collections: string[] = []
-      events.map((e) => {
+      events.map((e: { args: string[] }) => {
         collections.push(e.args?.[0])
       })
       setRmrkCollections(collections)

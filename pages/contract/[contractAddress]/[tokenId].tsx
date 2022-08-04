@@ -3,16 +3,15 @@ import styles from "../../../styles/Home.module.css"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 import { Contract, Signer } from "ethers"
-import { useProvider, useSigner } from "wagmi"
+import { useContract, useProvider, useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import Resource from "../../../components/resource"
-import { rmrkMultiResourceContract } from "../../../constants"
+import abis from "../../../abis/abis"
 
 const MultiResourceNft = () => {
   const provider = useProvider()
   const { data: signer } = useSigner()
   const addRecentTransaction = useAddRecentTransaction()
-  let multiResourceContract: Contract
   const router = useRouter()
   const { contractAddress, tokenId } = router.query
   const [resourceInput, setResourceInput] = useState<string>("")
@@ -24,6 +23,11 @@ const MultiResourceNft = () => {
   const [allResourcesData, setAllResourcesData] = useState<string[]>([])
   const [activeResourcesData, setActiveResourcesData] = useState<string[]>([])
   const [pendingResourcesData, setPendingResourcesData] = useState<string[]>([])
+  const multiResourceContract = useContract({
+    addressOrName: contractAddress as string,
+    contractInterface: abis.multiResourceAbi,
+    signerOrProvider: provider,
+  })
 
   useEffect(() => {
     console.log("getting [contractAddress] data" + " for token id: " + tokenId)
@@ -39,11 +43,6 @@ const MultiResourceNft = () => {
   }, [tokenId])
 
   async function fetchNft() {
-    multiResourceContract = new Contract(
-      contractAddress as string,
-      rmrkMultiResourceContract.contractInterface,
-      provider
-    )
     const name: string = await multiResourceContract.name()
     const tokenUri: string = await multiResourceContract.tokenURI(tokenId)
     const allResources: string[] = await multiResourceContract.getAllResources()
@@ -75,9 +74,8 @@ const MultiResourceNft = () => {
   async function addResource() {
     if (signer instanceof Signer) {
       const tx = await multiResourceContract
-        .connect(signer) //TODO FIXME add auto incrementing IDs to resources in Multi Resource factory
-        //resource IDs are randomized for now as a temporary solution
-        .addResourceEntry(Math.floor(Math.random() * 999999), resourceInput, [])
+        .connect(signer)
+        .addResourceEntry(resourceInput)
       addRecentTransaction({
         hash: tx.hash,
         description: "Adding a new resource to collection",
@@ -125,7 +123,7 @@ const MultiResourceNft = () => {
     }
   }
 
-  async function setCustomData(id : number) {
+  async function setCustomData(id: number) {
     //TODO pass resourceId and customResourceId through the modal here
     if (signer instanceof Signer) {
       // const tx = await multiResourceContract
@@ -230,30 +228,6 @@ const MultiResourceNft = () => {
               }}
             >
               Add resource to token
-            </button>
-            <button
-              // onClick={() => {
-              //   addCustomData(index).then(() => fetchNft())
-              // }}
-              className="btn btn-primary btn-sm m-1"
-            >
-              Add custom data
-            </button>
-            <button
-              onClick={() => {
-                setCustomData(index).then(() => fetchNft())
-              }}
-              className="btn btn-secondary btn-sm m-1"
-            >
-              Set custom data
-            </button>
-            <button
-              // onClick={() => {
-              //   removeCustomData(index).then(() => fetchNft())
-              // }}
-              className="btn btn-secondary btn-sm m-1"
-            >
-              Remove custom data
             </button>
           </div>
         )
