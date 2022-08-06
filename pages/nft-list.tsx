@@ -3,6 +3,7 @@ import Nft from "./nft"
 
 const NftList = (props: {
   tokenContract: string
+  tokenType: string
   nfts: { tokenId: number; owner: string; tokenUri: string }[]
 }) => {
   return (
@@ -16,6 +17,7 @@ const NftList = (props: {
                 tokenContract={props.tokenContract}
                 tokenId={nft.tokenId}
                 tokenUri={nft.tokenUri}
+                tokenType={props.tokenType}
               />
             </div>
           )

@@ -161,7 +161,7 @@ const MultiResource: NextPage = () => {
     console.log("Loading chain data")
     setLoading(true)
     fetchData()
-  }, [signer, currentRmrkDeployment])
+  }, [currentRmrkDeployment])
 
   return (
     <div className={styles.container}>
@@ -294,7 +294,11 @@ const MultiResource: NextPage = () => {
             <p className="mb-5">
               Click on the NFT card to open resource management page.
             </p>
-            <NftList nfts={ownedNfts} tokenContract={currentRmrkDeployment} />
+            <NftList
+              nfts={ownedNfts}
+              tokenContract={currentRmrkDeployment}
+              tokenType={"contract"}
+            />
           </>
         )}
         {loading && <progress className="progress mt-2 w-72"></progress>}

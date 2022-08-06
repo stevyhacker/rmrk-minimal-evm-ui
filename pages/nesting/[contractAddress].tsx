@@ -10,10 +10,10 @@ import Head from "next/head"
 import Resource from "../../components/resource"
 import abis from "../../abis/abis"
 
-const MultiResourceNftCollection: NextPage = () => {
+const NestingNftCollection: NextPage = () => {
   const router = useRouter()
   const { contractAddress } = router.query
-  let multiResourceContract: Contract
+  let nestingContract: Contract
   const addRecentTransaction = useAddRecentTransaction()
   const { data: signer, isSuccess } = useSigner()
   const [currentRmrkDeployment, setCurrentRmrkDeployment] = useState<string>("")
@@ -40,17 +40,16 @@ const MultiResourceNftCollection: NextPage = () => {
 
   async function fetchNftCollection() {
     if (signer instanceof Signer) {
-      multiResourceContract = new Contract(
+      nestingContract = new Contract(
         contractAddress as string,
-        abis.multiResourceAbi,
+        abis.nestingImplAbi,
         signer
       )
-      const name: string = await multiResourceContract.name()
-      const allResources: string[] =
-        await multiResourceContract.getAllResources()
+      const name: string = await nestingContract.name()
+      const allResources: string[] = await nestingContract.getAllResources()
       const allData: string[] = []
       for (const r of allResources) {
-        const resourceData = await multiResourceContract.getResource(r)
+        const resourceData = await nestingContract.getResource(r)
         allData.push(resourceData)
       }
       setAllResourcesData(allData)
@@ -66,20 +65,18 @@ const MultiResourceNftCollection: NextPage = () => {
       signer instanceof Signer &&
       ethers.utils.isAddress(currentRmrkDeployment)
     ) {
-      multiResourceContract = new Contract(
+      nestingContract = new Contract(
         currentRmrkDeployment,
-        abis.multiResourceAbi,
+        abis.nestingImplAbi,
         signer
       )
-      setIsOwner(
-        (await multiResourceContract.owner()) == (await signer.getAddress())
-      )
-      const nftSupply = await multiResourceContract.totalSupply()
+      setIsOwner((await nestingContract.owner()) == (await signer.getAddress()))
+      const nftSupply = await nestingContract.totalSupply()
       for (let i = 0; i < nftSupply; i++) {
         let isOwner = false
         try {
           isOwner =
-            (await multiResourceContract.connect(signer).ownerOf(i)) ==
+            (await nestingContract.connect(signer).ownerOf(i)) ==
             (await signer.getAddress())
         } catch (error) {
           console.log(error)
@@ -88,7 +85,7 @@ const MultiResourceNftCollection: NextPage = () => {
           nfts.push({
             tokenId: i,
             owner: await signer.getAddress(),
-            tokenUri: await multiResourceContract.tokenURI(i),
+            tokenUri: await nestingContract.tokenURI(i),
           })
         }
       }
@@ -101,16 +98,16 @@ const MultiResourceNftCollection: NextPage = () => {
       signer instanceof Signer &&
       ethers.utils.isAddress(currentRmrkDeployment)
     ) {
-      multiResourceContract = new Contract(
+      nestingContract = new Contract(
         currentRmrkDeployment,
-        abis.multiResourceAbi,
+        abis.nestingImplAbi,
         signer
       )
 
       const options = {
-        value: multiResourceContract.pricePerMint(),
+        value: nestingContract.pricePerMint(),
       }
-      const tx = await multiResourceContract
+      const tx = await nestingContract
         .connect(signer)
         .mint(await signer.getAddress(), 1, options)
 
@@ -124,12 +121,12 @@ const MultiResourceNftCollection: NextPage = () => {
 
   async function addResource() {
     if (signer instanceof Signer) {
-      multiResourceContract = new Contract(
+      nestingContract = new Contract(
         currentRmrkDeployment,
-        abis.multiResourceAbi,
+        abis.nestingImplAbi,
         signer
       )
-      const tx = await multiResourceContract
+      const tx = await nestingContract
         .connect(signer)
         .addResourceEntry(resourceInput)
       addRecentTransaction({
@@ -189,7 +186,7 @@ const MultiResourceNftCollection: NextPage = () => {
         <NftList
           nfts={ownedNfts}
           tokenContract={currentRmrkDeployment}
-          tokenType={"contract"}
+          tokenType={"nesting"}
         />
 
         <p className="text-center text-2xl mt-10">NFT Collection Resources:</p>
@@ -230,4 +227,4 @@ const MultiResourceNftCollection: NextPage = () => {
   )
 }
 
-export default MultiResourceNftCollection
+export default NestingNftCollection

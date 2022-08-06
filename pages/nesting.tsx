@@ -250,7 +250,7 @@ const Nesting: NextPage = () => {
                     onChange={handleContractSelection}
                   />
 
-                  <Link href={"/contract/" + contract}>
+                  <Link href={"/nesting/" + contract}>
                     <code className="mx-2 hover:underline">{contract}</code>
                   </Link>
                   <a href={"https://moonbase.moonscan.io/address/" + contract}>
@@ -286,7 +286,11 @@ const Nesting: NextPage = () => {
             <p className="mb-5">
               Click on the NFT card to open resource management page.
             </p>
-            <NftList nfts={ownedNfts} tokenContract={currentRmrkDeployment} />
+            <NftList
+              nfts={ownedNfts}
+              tokenContract={currentRmrkDeployment}
+              tokenType={"nesting"}
+            />
           </>
         )}
         {loading && <progress className="progress mt-2 w-72"></progress>}

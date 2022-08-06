@@ -2,13 +2,15 @@ import { useRouter } from "next/router"
 import styles from "../../../styles/Home.module.css"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
-import { Contract, Signer } from "ethers"
+import { Signer } from "ethers"
 import { useContract, useProvider, useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import Resource from "../../../components/resource"
 import abis from "../../../abis/abis"
+import Link from "next/link"
+import { sign } from "crypto"
 
-const MultiResourceNft = () => {
+const NestingNft = () => {
   const provider = useProvider()
   const { data: signer } = useSigner()
   const addRecentTransaction = useAddRecentTransaction()
@@ -20,64 +22,96 @@ const MultiResourceNft = () => {
   const [tokenUri, setTokenUri] = useState<string>("")
   const [collectionName, setCollectionName] = useState<string>("")
   const [resources, setResources] = useState<string[]>([])
+  const [childrenTokens, setChildrenTokens] = useState<string[]>([])
+  const [pendingChildren, setPendingChildren] = useState<string[]>([])
   const [pendingResources, setPendingResources] = useState<string[]>([])
   const [activeResources, setActiveResources] = useState<string[]>([])
   const [allResourcesData, setAllResourcesData] = useState<string[]>([])
   const [activeResourcesData, setActiveResourcesData] = useState<string[]>([])
   const [pendingResourcesData, setPendingResourcesData] = useState<string[]>([])
-  const multiResourceContract = useContract({
+  const nestingContract = useContract({
     addressOrName: contractAddress as string,
-    contractInterface: abis.multiResourceAbi,
+    contractInterface: abis.nestingImplAbi,
     signerOrProvider: provider,
   })
+  const [ownedNfts, setOwnedNfts] = useState<
+    { tokenId: number; owner: string; tokenUri: string }[]
+  >([])
 
   useEffect(() => {
-    console.log(
-      "getting " + contractAddress + " data for token id: " + tokenId
-    )
+    console.log("getting " + contractAddress + " data for token id: " + tokenId)
     if (Number(tokenId) >= 0) {
-      fetchNft().then((nft) => {
-        setCollectionName(nft.name)
-        setResources(nft.allResources)
-        setActiveResources(nft.activeResources)
-        setPendingResources(nft.pendingResources)
-        setTokenUri(nft.tokenUri)
-      })
+      fetchNft().then(() => {})
     }
   }, [contractAddress, tokenId])
 
   async function fetchNft() {
-    const name: string = await multiResourceContract.name()
-    const tokenUri: string = await multiResourceContract.tokenURI(tokenId)
-    const allResources: string[] = await multiResourceContract.getAllResources()
-    const activeResources: string[] =
-      await multiResourceContract.getActiveResources(tokenId)
+    const name: string = await nestingContract.name()
+    const tokenUri: string = await nestingContract.tokenURI(tokenId)
+    const allResources: string[] = await nestingContract.getAllResources()
+    const children: string[] = await nestingContract.childrenOf(tokenId)
+    const pendingChildren: string[] = await nestingContract.pendingChildrenOf(
+      tokenId
+    )
+    const activeResources: string[] = await nestingContract.getActiveResources(
+      tokenId
+    )
     const pendingResources: string[] =
-      await multiResourceContract.getPendingResources(tokenId)
+      await nestingContract.getPendingResources(tokenId)
     const allData: string[] = []
     const pendingResourcesData: string[] = []
     const activeResourcesData: string[] = []
+    const nfts = []
+    const nftSupply = await nestingContract.totalSupply()
+
+    if (signer instanceof Signer) {
+      console.log("Fetching NFT collection")
+      const signerAddress = await signer.getAddress()
+      for (let i = 0; i < nftSupply; i++) {
+        let isOwner = false
+        try {
+          isOwner =
+            (await nestingContract.connect(signer).ownerOf(i)) == signerAddress
+        } catch (error) {
+          // console.log(error)
+        }
+        if (isOwner && i != Number(tokenId)) {
+          nfts.push({
+            tokenId: i,
+            owner: signerAddress,
+            tokenUri: await nestingContract.tokenURI(i),
+          })
+        }
+      }
+      setOwnedNfts(nfts)
+    }
     for (const r of allResources) {
-      const resourceData = await multiResourceContract.getResource(r)
+      const resourceData = await nestingContract.getResource(r)
       allData.push(resourceData)
     }
     for (const r of pendingResources) {
-      const resourceData = await multiResourceContract.getResource(r)
+      const resourceData = await nestingContract.getResource(r)
       pendingResourcesData.push(resourceData)
     }
     for (const r of activeResources) {
-      const resourceData = await multiResourceContract.getResource(r)
+      const resourceData = await nestingContract.getResource(r)
       activeResourcesData.push(resourceData)
     }
     setAllResourcesData(allData)
     setPendingResourcesData(pendingResourcesData)
     setActiveResourcesData(activeResourcesData)
-    return { name, allResources, activeResources, pendingResources, tokenUri }
+    setChildrenTokens(children)
+    setPendingChildren(pendingChildren)
+    setCollectionName(name)
+    setResources(allResources)
+    setActiveResources(activeResources)
+    setPendingResources(pendingResources)
+    setTokenUri(tokenUri)
   }
 
   async function addResource() {
     if (signer instanceof Signer) {
-      const tx = await multiResourceContract
+      const tx = await nestingContract
         .connect(signer)
         .addResourceEntry(resourceInput)
       addRecentTransaction({
@@ -90,7 +124,7 @@ const MultiResourceNft = () => {
 
   async function rejectResource(resourceId: number) {
     if (signer instanceof Signer) {
-      const tx = await multiResourceContract
+      const tx = await nestingContract
         .connect(signer)
         .rejectResource(tokenId, resourceId)
       addRecentTransaction({
@@ -103,7 +137,7 @@ const MultiResourceNft = () => {
 
   async function acceptResource(resourceId: number) {
     if (signer instanceof Signer) {
-      const tx = await multiResourceContract
+      const tx = await nestingContract
         .connect(signer)
         .acceptResource(tokenId, resourceId)
       addRecentTransaction({
@@ -116,7 +150,7 @@ const MultiResourceNft = () => {
 
   async function addResourceToToken(resourceId: number) {
     if (signer instanceof Signer) {
-      const tx = await multiResourceContract
+      const tx = await nestingContract
         .connect(signer)
         .addResourceToToken(tokenId, resourceId, 0)
       addRecentTransaction({
@@ -127,17 +161,24 @@ const MultiResourceNft = () => {
     }
   }
 
-  async function setCustomData(id: number) {
-    //TODO pass resourceId and customResourceId through the modal here
+  async function addChildToToken(childTokenId: number) {
     if (signer instanceof Signer) {
-      // const tx = await multiResourceContract
-      //   .connect(signer)
-      //   .addCustomDataToResource(resourceId, customResourceId)
-      // addRecentTransaction({
-      //   hash: tx.hash,
-      //   description: "Adding a custom data to resource",
-      //   confirmations: 1,
-      // })
+      console.log(
+        "tokenId: " +
+          tokenId +
+          " childTokenId: " +
+          childTokenId +
+          " contractAddress: " +
+          contractAddress
+      )
+      const tx = await nestingContract
+        .connect(signer)
+        .addChild(tokenId, childTokenId, contractAddress)
+      addRecentTransaction({
+        hash: tx.hash,
+        description: "Adding a child token to this NFT",
+        confirmations: 1,
+      })
     }
   }
 
@@ -170,6 +211,22 @@ const MultiResourceNft = () => {
           alt={""}
         />
         <div>
+          <h1 className="text-center text-xl mt-5"> Token Children:</h1>
+          {childrenTokens.map((resource, index) => {
+            return (
+              <div key={index} className={styles.card}>
+                <p>Token #{index}</p>
+              </div>
+            )
+          })}
+          <h1 className="text-center text-xl mt-5"> Token Pending Children:</h1>
+          {pendingChildren.map((resource, index) => {
+            return (
+              <div key={index} className={styles.card}>
+                <p>Token #{index}</p>
+              </div>
+            )
+          })}
           <h1 className="text-center text-xl mt-5"> Token Active Resources:</h1>
           {activeResources.map((resource, index) => {
             return (
@@ -215,6 +272,52 @@ const MultiResourceNft = () => {
         </div>
       </div>
 
+      <p className="text-center text-2xl mt-10">NFT Collection Tokens:</p>
+
+      <div className={styles.grid}>
+        <div className={styles.container}>
+          {ownedNfts?.map((nft, index) => {
+            return (
+              <div key={index}>
+                <div className={styles.card}>
+                  <Link
+                    href={
+                      "/nesting/" +
+                      `${encodeURIComponent(
+                        contractAddress
+                      )}/${encodeURIComponent(nft.tokenId)}`
+                    }
+                  >
+                    <div>
+                      <p className={styles.description}>
+                        Token ID: {nft.tokenId}
+                      </p>
+                      <Image
+                        src={"https://ipfs.io/ipfs/" + nft.tokenUri}
+                        width={100}
+                        height={100}
+                        alt={""}
+                      />
+                    </div>
+                  </Link>
+
+                  <div>
+                    <button
+                      className="btn btn-primary btn-sm ml-2 "
+                      onClick={() => {
+                        addChildToToken(nft.tokenId)
+                      }}
+                    >
+                      Add child to token
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
       <p className="text-center text-2xl mt-10">NFT Collection Resources:</p>
       {resources.map((resource, index) => {
         return (
@@ -251,37 +354,8 @@ const MultiResourceNft = () => {
       >
         Add New Resource
       </button>
-
-      <input
-        type="checkbox"
-        id="add-custom-data-modal"
-        className="modal-toggle"
-      />
-      <div className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Add Custom Data</h3>
-          <input
-            inputMode="text"
-            placeholder="custom data"
-            className="input input-bordered w-full max-w-xs mt-5"
-            value={resourceInput}
-            onChange={handleResourceInput}
-          ></input>
-          <div className="modal-action">
-            <label
-              htmlFor="add-custom-data-modal"
-              onClick={() => {
-                // addCustomData().then(() => fetchNft())
-              }}
-              className="btn btn-primary"
-            >
-              Save
-            </label>
-          </div>
-        </div>
-      </div>
     </main>
   )
 }
 
-export default MultiResourceNft
+export default NestingNft

@@ -6,11 +6,12 @@ const Nft = (props: {
   tokenContract: string
   tokenId: number
   tokenUri: string
+  tokenType: string
 }) => {
   return (
     <Link
       href={
-        "//contract/" +
+        "/" + props.tokenType + "/" +
         `${encodeURIComponent(props.tokenContract)}/${encodeURIComponent(
           props.tokenId
         )}`
