@@ -130,19 +130,20 @@ const MultiResource: NextPage = () => {
 
   async function queryCollections() {
     if (signer instanceof Signer) {
-      let fromBlock = 2550593 // contract creation block
-      const events = await factoryContract.queryFilter(
-        factoryContract.filters.NewRMRKMultiResourceContract(
-          null,
-          await signer.getAddress()
-        ),
-        fromBlock,
-        "latest"
-      )
-      let collections: string[] = []
-      events.map((e: { args: string[] }) => {
-        collections.push(e.args?.[0])
-      })
+      const collections: string[] = []
+      const allCollectionDeployments = await factoryContract.getCollections()
+      for (let i = 0; i < allCollectionDeployments.length; i++) {
+        console.log(allCollectionDeployments[i])
+        const collection = new Contract(
+          allCollectionDeployments[i],
+          abis.multiResourceAbi,
+          provider
+        )
+        if ((await collection.owner()) == address) {
+          collections.push(allCollectionDeployments[i])
+        }
+      }
+
       setRmrkCollections(collections)
     }
   }
@@ -161,7 +162,7 @@ const MultiResource: NextPage = () => {
     console.log("Loading chain data")
     setLoading(true)
     fetchData()
-  }, [currentRmrkDeployment])
+  }, [signer, currentRmrkDeployment])
 
   return (
     <div className={styles.container}>
