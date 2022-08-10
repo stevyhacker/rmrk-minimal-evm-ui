@@ -216,19 +216,19 @@ const MultiResourceNft = () => {
       </div>
 
       <p className="text-center text-2xl mt-10">NFT Collection Resources:</p>
-      {resources.map((resource, index) => {
+      {resources.map((resourceId, index) => {
         return (
           <div key={index} className={styles.card}>
             <Resource
               key={index}
-              resource={resource}
+              resource={resourceId}
               strings={allResourcesData}
               index={index}
             />
             <button
               className="btn btn-primary btn-sm ml-2 "
               onClick={() => {
-                addResourceToToken(index).then(() => fetchNft())
+                addResourceToToken(Number(resourceId)).then(() => fetchNft())
               }}
             >
               Add resource to token
