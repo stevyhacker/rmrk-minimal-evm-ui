@@ -8,7 +8,7 @@ import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import Resource from "../../../components/resource"
 import abis from "../../../abis/abis"
 import Link from "next/link"
-import { sign } from "crypto"
+import ChildNft from "../../child-nft"
 
 const NestingNft = () => {
   const provider = useProvider()
@@ -22,8 +22,12 @@ const NestingNft = () => {
   const [tokenUri, setTokenUri] = useState<string>("")
   const [collectionName, setCollectionName] = useState<string>("")
   const [resources, setResources] = useState<string[]>([])
-  const [childrenTokens, setChildrenTokens] = useState<string[]>([])
-  const [pendingChildren, setPendingChildren] = useState<string[]>([])
+  const [childrenTokens, setChildrenTokens] = useState<
+    { tokenId: string; tokenUri: any }[]
+  >([])
+  const [pendingChildren, setPendingChildren] = useState<
+    { tokenId: string; tokenUri: any }[]
+  >([])
   const [pendingResources, setPendingResources] = useState<string[]>([])
   const [activeResources, setActiveResources] = useState<string[]>([])
   const [allResourcesData, setAllResourcesData] = useState<string[]>([])
@@ -43,7 +47,7 @@ const NestingNft = () => {
     if (Number(tokenId) >= 0) {
       fetchNft().then(() => {})
     }
-  }, [contractAddress, tokenId])
+  }, [signer, contractAddress, tokenId])
 
   async function fetchNft() {
     const name: string = await nestingContract.name()
@@ -62,6 +66,8 @@ const NestingNft = () => {
     const pendingResourcesData: string[] = []
     const activeResourcesData: string[] = []
     const nfts = []
+    const pendingChildrenNfts = []
+    const childrenNfts = []
     const nftSupply = await nestingContract.totalSupply()
 
     if (signer instanceof Signer) {
@@ -97,11 +103,23 @@ const NestingNft = () => {
       const resourceData = await nestingContract.getResource(r)
       activeResourcesData.push(resourceData)
     }
+    for (const c of pendingChildren) {
+      pendingChildrenNfts.push({
+        tokenId: c.toString().split(",")[0],
+        tokenUri: await nestingContract.tokenURI(c.toString().split(",")[0]),
+      })
+    }
+    for (const c of children) {
+      childrenNfts.push({
+        tokenId: c.toString().split(",")[0],
+        tokenUri: await nestingContract.tokenURI(c.toString().split(",")[0]),
+      })
+    }
     setAllResourcesData(allData)
     setPendingResourcesData(pendingResourcesData)
     setActiveResourcesData(activeResourcesData)
-    setChildrenTokens(children)
-    setPendingChildren(pendingChildren)
+    setChildrenTokens(childrenNfts)
+    setPendingChildren(pendingChildrenNfts)
     setCollectionName(name)
     setResources(allResources)
     setActiveResources(activeResources)
@@ -163,20 +181,12 @@ const NestingNft = () => {
 
   async function addChildToToken(childTokenId: number) {
     if (signer instanceof Signer) {
-      console.log(
-        "tokenId: " +
-          tokenId +
-          " childTokenId: " +
-          childTokenId +
-          " contractAddress: " +
-          contractAddress
-      )
       const tx = await nestingContract
         .connect(signer)
-        .addChild(tokenId, childTokenId, contractAddress)
+        .nestTransfer(contractAddress, childTokenId, tokenId)
       addRecentTransaction({
         hash: tx.hash,
-        description: "Adding a child token to this NFT",
+        description: "Transferring child token into this NFT",
         confirmations: 1,
       })
     }
@@ -184,6 +194,19 @@ const NestingNft = () => {
 
   function handleResourceInput(e: React.ChangeEvent<HTMLInputElement>) {
     setResourceInput(e.target.value)
+  }
+
+  async function acceptChild(index: number) {
+    if (signer instanceof Signer) {
+      const tx = await nestingContract
+        .connect(signer)
+        .acceptChild(tokenId, index)
+      addRecentTransaction({
+        hash: tx.hash,
+        description: "Accepting child for this NFT",
+        confirmations: 1,
+      })
+    }
   }
 
   return (
@@ -203,30 +226,56 @@ const NestingNft = () => {
         If you are not authorized like above the transactions will be reverted
       </li>
       <div className={styles.nft}>
-        <p>Token ID: {tokenId}</p>
+        <p className={styles.description}>Token ID: {tokenId}</p>
         <Image
           src={"https://ipfs.io/ipfs/" + tokenUri}
-          width={50}
-          height={50}
+          width={120}
+          height={120}
           alt={""}
         />
         <div>
-          <h1 className="text-center text-xl mt-5"> Token Children:</h1>
-          {childrenTokens.map((resource, index) => {
-            return (
-              <div key={index} className={styles.card}>
-                <p>Token #{index}</p>
-              </div>
-            )
-          })}
-          <h1 className="text-center text-xl mt-5"> Token Pending Children:</h1>
-          {pendingChildren.map((resource, index) => {
-            return (
-              <div key={index} className={styles.card}>
-                <p>Token #{index}</p>
-              </div>
-            )
-          })}
+          <div className="bg-gray-200 p-0.5 rounded-lg">
+            <h1 className="text-center text-xl mt-5"> Token Children:</h1>
+            {childrenTokens.length > 0 ? (
+              childrenTokens.map((child, index) => {
+                return (
+                  <ChildNft
+                    key={index}
+                    uriComponent={contractAddress}
+                    child={child}
+                  />
+                )
+              })
+            ) : (
+              <p>0</p>
+            )}
+            <h1 className="text-center text-xl mt-5">
+              Token Pending Children:
+            </h1>
+            {pendingChildren.length > 0 ? (
+              pendingChildren.map((child, index) => {
+                return (
+                  <>
+                  <ChildNft
+                    key={index}
+                    uriComponent={contractAddress}
+                    child={child}
+                  />
+                    <button
+                      className="btn btn-primary btn-sm mb-2 "
+                      onClick={() => {
+                        acceptChild(index).then((r) => fetchNft())
+                      }}
+                    >
+                      Accept child
+                    </button>
+                  </>
+                )
+              })
+            ) : (
+              <p>0</p>
+            )}
+          </div>
           <h1 className="text-center text-xl mt-5"> Token Active Resources:</h1>
           {activeResources.map((resource, index) => {
             return (
@@ -305,10 +354,10 @@ const NestingNft = () => {
                     <button
                       className="btn btn-primary btn-sm ml-2 "
                       onClick={() => {
-                        addChildToToken(nft.tokenId).then(r => fetchNft())
+                        addChildToToken(nft.tokenId).then((r) => fetchNft())
                       }}
                     >
-                      Add child to token
+                      Nest into token id {tokenId}
                     </button>
                   </div>
                 </div>
