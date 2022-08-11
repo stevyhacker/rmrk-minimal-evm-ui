@@ -1,4 +1,4 @@
-import NftList from "../nft-list"
+import NftList from "../../components/nft-list"
 import React, { useEffect, useState } from "react"
 import { useRouter } from "next/router"
 import { Contract, ethers, Signer } from "ethers"

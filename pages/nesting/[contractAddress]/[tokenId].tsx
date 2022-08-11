@@ -8,7 +8,7 @@ import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import Resource from "../../../components/resource"
 import abis from "../../../abis/abis"
 import Link from "next/link"
-import ChildNft from "../../child-nft"
+import ChildNft from "../../../components/child-nft"
 
 const NestingNft = () => {
   const provider = useProvider()
