@@ -9,6 +9,8 @@ import Resource from "../../../components/resource"
 import abis from "../../../abis/abis"
 import Link from "next/link"
 import ChildNft from "../../../components/child-nft"
+import AddResourceToCollection from "../../../components/add-resource"
+
 
 const NestingNft = () => {
   const provider = useProvider()
@@ -19,6 +21,7 @@ const NestingNft = () => {
   const contractAddress = query[2]
   const tokenId = query[3]
   const [resourceInput, setResourceInput] = useState<string>("")
+  const [tokenOwner, setTokenOwner] = useState<string>("")
   const [tokenUri, setTokenUri] = useState<string>("")
   const [collectionName, setCollectionName] = useState<string>("")
   const [resources, setResources] = useState<string[]>([])
@@ -69,6 +72,7 @@ const NestingNft = () => {
     const pendingChildrenNfts = []
     const childrenNfts = []
     const nftSupply = await nestingContract.totalSupply()
+    const nftOwner = await nestingContract.ownerOf(tokenId)
 
     if (signer instanceof Signer) {
       console.log("Fetching NFT collection")
@@ -115,6 +119,7 @@ const NestingNft = () => {
         tokenUri: await nestingContract.tokenURI(c.toString().split(",")[0]),
       })
     }
+    setTokenOwner(nftOwner)
     setAllResourcesData(allData)
     setPendingResourcesData(pendingResourcesData)
     setActiveResourcesData(activeResourcesData)
@@ -209,30 +214,55 @@ const NestingNft = () => {
     }
   }
 
+  async function rejectChild(index: number) {
+    if (signer instanceof Signer) {
+      const tx = await nestingContract
+        .connect(signer)
+        .rejectChild(tokenId, index)
+      addRecentTransaction({
+        hash: tx.hash,
+        description: "Rejecting child for this NFT",
+        confirmations: 1,
+      })
+    }
+  }
+
   return (
     <main className={styles.main}>
       <ConnectButton />
 
       <h4 className={styles.description}>Collection name: {collectionName}</h4>
-      <ul className="mt-1">Usage Notes:</ul>
+      <ul className="my-1 font-bold">Usage Notes:</ul>
       <li>
-        You have to be the Owner of the NFT or Approved to accept or reject a
-        resource
+        You have to be the <b>Owner</b> of the NFT or Approved to accept or
+        reject a resource
       </li>
       <li>
-        You have to be the Owner of the NFT Collection to add new resources
+        You have to be the <b>Owner</b> of the NFT Collection to add new
+        resources
       </li>
       <li>
+        You have to be the <b>Owner</b> of the NFT to accept and reject a child
+        or to nest into an NFT.
+      </li>
+      <li className="mb-2">
         If you are not authorized like above the transactions will be reverted
       </li>
       <div className={styles.nft}>
         <p className={styles.description}>Token ID: {tokenId}</p>
-        <Image
-          src={"https://ipfs.io/ipfs/" + tokenUri}
-          width={120}
-          height={120}
-          alt={""}
-        />
+        <p className="">Token Owner: </p>
+        <code className="">{tokenOwner}</code>
+        <p className="mt-1">Token URI: </p>
+        <code>{tokenUri}</code>
+        <div className="mt-2">
+          <Image
+            src={"https://ipfs.io/ipfs/" + tokenUri}
+            width={120}
+            height={120}
+            alt={""}
+          />
+        </div>
+
         <div>
           <div className="bg-gray-200 p-0.5 rounded-lg">
             <h1 className="text-center text-xl mt-5"> Token Children:</h1>
@@ -256,11 +286,11 @@ const NestingNft = () => {
               pendingChildren.map((child, index) => {
                 return (
                   <>
-                  <ChildNft
-                    key={index}
-                    uriComponent={contractAddress}
-                    child={child}
-                  />
+                    <ChildNft
+                      key={index}
+                      uriComponent={contractAddress}
+                      child={child}
+                    />
                     <button
                       className="btn btn-primary btn-sm mb-2 "
                       onClick={() => {
@@ -268,6 +298,14 @@ const NestingNft = () => {
                       }}
                     >
                       Accept child
+                    </button>
+                    <button
+                      className="btn btn-secondary btn-sm ml-2 "
+                      onClick={() => {
+                        rejectChild(index).then((r) => fetchNft())
+                      }}
+                    >
+                      Reject child
                     </button>
                   </>
                 )
@@ -308,7 +346,7 @@ const NestingNft = () => {
                   Accept Resource
                 </button>
                 <button
-                  className="btn btn-secondary ml-1"
+                  className="btn btn-secondary ml-2 "
                   onClick={() => {
                     rejectResource(index).then(() => fetchNft())
                   }}
@@ -388,21 +426,13 @@ const NestingNft = () => {
           </div>
         )
       })}
-      <input
-        inputMode="text"
-        placeholder="Resource metadata URI"
-        className="input input-bordered w-full max-w-xs mt-4 mb-2"
+      <AddResourceToCollection
         value={resourceInput}
         onChange={handleResourceInput}
-      ></input>
-      <button
-        className="btn btn-primary mt-2"
         onClick={() => {
           addResource().then(() => fetchNft())
         }}
-      >
-        Add New Resource
-      </button>
+      />
     </main>
   )
 }

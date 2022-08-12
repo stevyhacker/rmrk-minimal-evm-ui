@@ -7,6 +7,7 @@ import { useContract, useProvider, useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import Resource from "../../../components/resource"
 import abis from "../../../abis/abis"
+import AddResourceToCollection from "../../../components/add-resource"
 
 const MultiResourceNft = () => {
   const provider = useProvider()
@@ -236,21 +237,13 @@ const MultiResourceNft = () => {
           </div>
         )
       })}
-      <input
-        inputMode="text"
-        placeholder="Resource metadata URI"
-        className="input input-bordered w-full max-w-xs mt-4 mb-2"
+      <AddResourceToCollection
         value={resourceInput}
         onChange={handleResourceInput}
-      ></input>
-      <button
-        className="btn btn-primary mt-2"
         onClick={() => {
           addResource().then(() => fetchNft())
         }}
-      >
-        Add New Resource
-      </button>
+      />
 
       <input
         type="checkbox"

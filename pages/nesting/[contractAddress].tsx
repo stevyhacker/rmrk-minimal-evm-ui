@@ -9,6 +9,7 @@ import styles from "../../styles/Home.module.css"
 import Head from "next/head"
 import Resource from "../../components/resource"
 import abis from "../../abis/abis"
+import AddResourceToCollection from "../../components/add-resource"
 
 const NestingNftCollection: NextPage = () => {
   const router = useRouter()
@@ -203,23 +204,13 @@ const NestingNftCollection: NextPage = () => {
           )
         })}
         {isOwner && (
-          <>
-            <input
-              inputMode="text"
-              placeholder="Resource metadata URI"
-              className="input input-bordered w-full max-w-xs mt-4 mb-2"
-              value={resourceInput}
-              onChange={handleResourceInput}
-            ></input>
-            <button
-              className="btn btn-primary mt-2"
-              onClick={() => {
-                addResource().then(() => fetchNftCollection())
-              }}
-            >
-              Add New Resource
-            </button>
-          </>
+          <AddResourceToCollection
+            value={resourceInput}
+            onChange={handleResourceInput}
+            onClick={() => {
+              addResource().then(() => fetchNftCollection())
+            }}
+          />
         )}
       </main>
       <footer className={styles.footer}></footer>
