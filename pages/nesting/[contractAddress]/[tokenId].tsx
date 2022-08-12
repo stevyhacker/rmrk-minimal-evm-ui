@@ -11,7 +11,6 @@ import Link from "next/link"
 import ChildNft from "../../../components/child-nft"
 import AddResourceToCollection from "../../../components/add-resource"
 
-
 const NestingNft = () => {
   const provider = useProvider()
   const { data: signer } = useSigner()
@@ -227,6 +226,19 @@ const NestingNft = () => {
     }
   }
 
+  async function removeChild(index: number) {
+    if (signer instanceof Signer) {
+      const tx = await nestingContract
+        .connect(signer)
+        .removeChild(tokenId, index)
+      addRecentTransaction({
+        hash: tx.hash,
+        description: "Removing child from this NFT",
+        confirmations: 1,
+      })
+    }
+  }
+
   return (
     <main className={styles.main}>
       <ConnectButton />
@@ -269,11 +281,21 @@ const NestingNft = () => {
             {childrenTokens.length > 0 ? (
               childrenTokens.map((child, index) => {
                 return (
-                  <ChildNft
-                    key={index}
-                    uriComponent={contractAddress}
-                    child={child}
-                  />
+                  <>
+                    <ChildNft
+                      key={index}
+                      uriComponent={contractAddress}
+                      child={child}
+                    />
+                    <button
+                      className="btn btn-secondary btn-sm ml-2 "
+                      onClick={() => {
+                        removeChild(index).then((r) => fetchNft())
+                      }}
+                    >
+                      Remove child
+                    </button>
+                  </>
                 )
               })
             ) : (
