@@ -120,6 +120,7 @@ const MultiResourceNftCollection: NextPage = () => {
         description: "Minting a new RMRK NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -138,6 +139,7 @@ const MultiResourceNftCollection: NextPage = () => {
         description: "Adding a new resource to collection",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 

@@ -117,6 +117,7 @@ const NestingNftCollection: NextPage = () => {
         description: "Minting a new RMRK NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -135,6 +136,7 @@ const NestingNftCollection: NextPage = () => {
         description: "Adding a new resource to collection",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 

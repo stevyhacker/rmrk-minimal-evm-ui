@@ -2,7 +2,7 @@ import { useRouter } from "next/router"
 import styles from "../../../styles/Home.module.css"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
-import { Contract, Signer } from "ethers"
+import { Signer } from "ethers"
 import { useContract, useProvider, useSigner } from "wagmi"
 import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import Resource from "../../../components/resource"
@@ -33,9 +33,7 @@ const MultiResourceNft = () => {
   })
 
   useEffect(() => {
-    console.log(
-      "getting " + contractAddress + " data for token id: " + tokenId
-    )
+    console.log("getting " + contractAddress + " data for token id: " + tokenId)
     if (Number(tokenId) >= 0) {
       fetchNft().then((nft) => {
         setCollectionName(nft.name)
@@ -86,6 +84,7 @@ const MultiResourceNft = () => {
         description: "Adding a new resource to collection",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -99,6 +98,7 @@ const MultiResourceNft = () => {
         description: "Rejecting a resource for this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -112,6 +112,7 @@ const MultiResourceNft = () => {
         description: "Accepting a resource for this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -125,6 +126,7 @@ const MultiResourceNft = () => {
         description: "Adding a resource to this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 

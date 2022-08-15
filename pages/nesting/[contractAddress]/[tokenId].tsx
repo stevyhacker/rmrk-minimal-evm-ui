@@ -141,6 +141,7 @@ const NestingNft = () => {
         description: "Adding a new resource to collection",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -154,6 +155,7 @@ const NestingNft = () => {
         description: "Rejecting a resource for this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -167,6 +169,7 @@ const NestingNft = () => {
         description: "Accepting a resource for this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -180,6 +183,7 @@ const NestingNft = () => {
         description: "Adding a resource to this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -193,6 +197,7 @@ const NestingNft = () => {
         description: "Transferring child token into this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -210,6 +215,7 @@ const NestingNft = () => {
         description: "Accepting child for this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -223,19 +229,22 @@ const NestingNft = () => {
         description: "Rejecting child for this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
-  async function removeChild(index: number) {
+  async function removeChild(childId: number, index: number) {
     if (signer instanceof Signer) {
       const tx = await nestingContract
         .connect(signer)
         .removeChild(tokenId, index)
+        // .unnestChild(tokenId, childId, index)
       addRecentTransaction({
         hash: tx.hash,
         description: "Removing child from this NFT",
         confirmations: 1,
       })
+      await tx.wait(1)
     }
   }
 
@@ -290,7 +299,9 @@ const NestingNft = () => {
                     <button
                       className="btn btn-secondary btn-sm ml-2 "
                       onClick={() => {
-                        removeChild(index).then((r) => fetchNft())
+                        removeChild(Number(child.tokenId), index).then((r) =>
+                          fetchNft()
+                        )
                       }}
                     >
                       Remove child
