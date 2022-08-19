@@ -1,5 +1,8 @@
 .container {
   padding: 0 2rem;
+  justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .main {

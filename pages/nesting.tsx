@@ -2,7 +2,7 @@ import { ConnectButton, useAddRecentTransaction } from "@rainbow-me/rainbowkit"
 import type { NextPage } from "next"
 import Head from "next/head"
 import styles from "../styles/Home.module.css"
-import { nestingFactoryContract } from "../constants"
+import { nestingFactoryContractDetails } from "../constants"
 import { useAccount, useContract, useProvider, useSigner } from "wagmi"
 import { Contract, Signer } from "ethers"
 import NftList from "../components/nft-list"
@@ -28,7 +28,7 @@ const Nesting: NextPage = () => {
     { tokenId: number; owner: string; tokenUri: string }[]
   >([])
   const factoryContract = useContract({
-    ...nestingFactoryContract,
+    ...nestingFactoryContractDetails,
     signerOrProvider: signer,
   })
 

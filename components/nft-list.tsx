@@ -8,8 +8,8 @@ const NftList = (props: {
 }) => {
   return (
     <div className={styles.grid}>
+      <h3 className="font-semibold">Your RMRK NFTs: {props.nfts?.length}</h3>
       <div className={styles.container}>
-        <h3>Your RMRK NFTs: {props.nfts?.length}</h3>
         {props.nfts?.map((nft, index) => {
           return (
             <div key={index}>

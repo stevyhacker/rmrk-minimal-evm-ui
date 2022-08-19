@@ -47,6 +47,13 @@ const Home: NextPage = () => {
             </div>
           </Link>
 
+          <Link href="/marketplace" >
+            <div className={styles.card}>
+              <h2>Marketplace Demo &rarr;</h2>
+              <p>Buy and sell NFTs.</p>
+            </div>
+          </Link>
+
           <Link href="/equippable" >
             <div className={styles.card}>
               <h2>Equippable NFTs Demo &rarr;</h2>
