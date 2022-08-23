@@ -48,8 +48,8 @@ const moonBaseChain: Chain = {
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
-    moonBaseChain,
-    // chain.goerli,
+    // moonBaseChain,
+    chain.goerli,
     // moonRiverChain,
     ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true'
       ? [moonBaseChain]

@@ -26,6 +26,7 @@ interface NftData {
   tokenContract: string
   collectionName: string
   approved: boolean
+  price: any
 }
 
 const Marketplace: NextPage = () => {
@@ -64,15 +65,16 @@ const Marketplace: NextPage = () => {
       const nft = await marketplaceContract.listings(i)
       const tokenContract = new Contract(nft[2], erc721ABI, provider)
       nfts.push({
-        tokenId: nft[3],
+        tokenId: nft[3].toNumber(),
         owner: nft[1],
-        tokenUri: await tokenContract.tokenURI(i),
+        tokenUri: await tokenContract.tokenURI(nft[3]),
         tokenContract: nft[2],
         approved: await tokenContract.isApprovedForAll(
           address,
           marketplaceContract.address
         ),
         collectionName: await tokenContract.name(),
+        price: ethers.utils.formatEther(nft[9]),
       })
     }
     return nfts
@@ -93,10 +95,10 @@ const Marketplace: NextPage = () => {
         ...nestingCollectionDeployments,
       ]
 
-      console.log(allRmrkCollectionDeployments.length + " collections")
+      // console.log(allRmrkCollectionDeployments.length + " collections")
 
       for (let i = 0; i < allRmrkCollectionDeployments.length; i++) {
-        console.log(allRmrkCollectionDeployments[i])
+        // console.log(allRmrkCollectionDeployments[i])
         const collectionContract = new Contract(
           allRmrkCollectionDeployments[i],
           abis.multiResourceAbi,
@@ -123,6 +125,7 @@ const Marketplace: NextPage = () => {
                 marketplaceContract.address
               ),
               collectionName: await collectionContract.name(),
+              price: 0,
             })
           }
         }
@@ -137,35 +140,54 @@ const Marketplace: NextPage = () => {
     price: number
   ) {
     if (signer instanceof Signer) {
+      const tokenContract = new Contract(
+        tokenContractAddress,
+        abis.multiResourceAbi,
+        provider
+      )
+
       console.log(
-        marketplaceContract.address +
-          " " +
+        "marketplace: \n" +
+          marketplaceContract.address +
+          "\n\ntokenContract: \n" +
           tokenContractAddress +
-          " " +
+          "\n\ntokenId: \n" +
           tokenId +
-          " " +
+          "\n\nprice: \n" +
           price +
-          " " +
+          "\n\nsigner: \n" +
           (await signer.getAddress()) +
-          " " +
-          Date.now()
+          "\n\ntime: \n" +
+          Date.now() +
+          "\n\ntoken owner: \n" +
+          (await tokenContract.ownerOf(tokenId)) +
+          "\n\napproved for: \n" +
+          (await tokenContract.isApprovedForAll(
+            address,
+            marketplaceContract.address
+          )) +
+          "\n\nget approved: \n" +
+          (await tokenContract.getApproved(tokenId))
       )
       const listing = {
         assetContract: tokenContractAddress,
         tokenId: tokenId,
         // when should the listing open up for offers
-        startTime: Date.now() + 100000000,
+        startTime: Date.now(),
         // how long the listing will be open for
-        secondsUntilEndTime: 86400,
+        secondsUntilEndTime: 1 * 24 * 60 * 60,
         quantityToList: 1,
         // address of the currency contract that will be used to pay for the listing
-        currencyToAccept: "0x0000000000000000000000000000000000000802",
-        // currencyToAccept: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", for native ETH
+        // currencyToAccept: "0x0000000000000000000000000000000000000802",
+        currencyToAccept: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", // for native ETH
         // how much the asset will be sold for
         reservePricePerToken: ethers.utils.parseEther(price.toString()),
         buyoutPricePerToken: ethers.utils.parseEther(price.toString()),
         listingType: 0,
       }
+
+      console.log("listing")
+      console.log(listing)
 
       const tx = await marketplaceContract
         .connect(signer)
@@ -197,8 +219,10 @@ const Marketplace: NextPage = () => {
   }
 
   useEffect(() => {
-    console.log("Loading chain data")
-    fetchData()
+    if (signer instanceof Signer) {
+      console.log("Loading chain data")
+      fetchData()
+    }
   }, [signer])
 
   async function approveNft(tokenContractAddress: string, tokenId: number) {
@@ -212,6 +236,7 @@ const Marketplace: NextPage = () => {
       const tx = await tokenContract
         .connect(signer)
         .setApprovalForAll(marketplaceContract.address, true)
+      // .approve(marketplaceContract.address, tokenId)
 
       addRecentTransaction({
         hash: tx.hash,
@@ -258,8 +283,8 @@ const Marketplace: NextPage = () => {
                   tokenUri={nft.tokenUri}
                   tokenType={"contract"}
                 />
-                <div className="form-control mb-2">
-                  <label className="label">Sale price</label>
+                <div className="form-control">
+                  <label className="text-sm mb-0.5 ml-2">Sale price</label>
                   <input
                     inputMode="numeric"
                     pattern="[0-9]+([\.,][0-9]+)?"
@@ -289,7 +314,7 @@ const Marketplace: NextPage = () => {
                           nft.tokenId,
                           priceInput
                         ).then(() => {
-                          // fetchData()
+                          fetchData()
                         })
                       }}
                       className="btn btn-primary btn-sm mx-2 my-2 "
@@ -317,6 +342,23 @@ const Marketplace: NextPage = () => {
                   tokenUri={nft.tokenUri}
                   tokenType={"contract"}
                 />
+                <p className="text-center">Price: {nft.price} ETH</p>
+                <div className="form-control">
+                  <button
+                    onClick={() => {
+                      // buyNft(
+                      //   nft.tokenContract,
+                      //   nft.tokenId,
+                      //   priceInput
+                      // ).then(() => {
+                      //   fetchData()
+                      // })
+                    }}
+                    className="btn btn-primary btn-sm mx-2 my-2"
+                  >
+                    Buy NFT
+                  </button>
+                </div>
               </div>
             )
           })}
