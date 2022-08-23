@@ -9,14 +9,12 @@ import {
   useProvider,
   useSigner,
 } from "wagmi"
-import { Contract, Signer } from "ethers"
-import NftList from "../components/nft-list"
+import { Contract, ethers, Signer } from "ethers"
 import React, { useEffect, useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
 import abis from "../abis/abis"
 import {
   marketplaceContractDetails,
+  multiResourceFactoryContractDetails,
   nestingFactoryContractDetails,
 } from "../constants"
 import Nft from "../components/nft"
@@ -26,6 +24,8 @@ interface NftData {
   owner: string
   tokenUri: string
   tokenContract: string
+  collectionName: string
+  approved: boolean
 }
 
 const Marketplace: NextPage = () => {
@@ -43,13 +43,18 @@ const Marketplace: NextPage = () => {
     signerOrProvider: signer,
   })
 
-  const factoryContract = useContract({
+  const nestingFactoryContract = useContract({
     ...nestingFactoryContractDetails,
     signerOrProvider: signer,
   })
 
+  const factoryContract = useContract({
+    ...multiResourceFactoryContractDetails,
+    signerOrProvider: signer,
+  })
+
   function handlePriceInput(e: React.ChangeEvent<HTMLInputElement>) {
-    setPriceInput(Number(e.target.value))
+    setPriceInput(e.target.value)
   }
 
   async function getListedNfts() {
@@ -63,6 +68,11 @@ const Marketplace: NextPage = () => {
         owner: nft[1],
         tokenUri: await tokenContract.tokenURI(i),
         tokenContract: nft[2],
+        approved: await tokenContract.isApprovedForAll(
+          address,
+          marketplaceContract.address
+        ),
+        collectionName: await tokenContract.name(),
       })
     }
     return nfts
@@ -72,9 +82,19 @@ const Marketplace: NextPage = () => {
     const nfts: NftData[] = []
 
     if (signer instanceof Signer) {
-      // const rmrkCollections: Contract[] = []
-      const allRmrkCollectionDeployments =
+      const multiResourceRmrkCollectionDeployments =
         await factoryContract.getCollections()
+
+      const nestingCollectionDeployments =
+        await nestingFactoryContract.getCollections()
+
+      const allRmrkCollectionDeployments = [
+        ...multiResourceRmrkCollectionDeployments,
+        ...nestingCollectionDeployments,
+      ]
+
+      console.log(allRmrkCollectionDeployments.length + " collections")
+
       for (let i = 0; i < allRmrkCollectionDeployments.length; i++) {
         console.log(allRmrkCollectionDeployments[i])
         const collectionContract = new Contract(
@@ -90,7 +110,7 @@ const Marketplace: NextPage = () => {
             isOwner =
               (await collectionContract.connect(signer).ownerOf(i)) == address
           } catch (error) {
-            console.log(error)
+            // console.log(error)
           }
           if (isOwner) {
             nfts.push({
@@ -98,6 +118,11 @@ const Marketplace: NextPage = () => {
               owner: await signer.getAddress(),
               tokenUri: await collectionContract.tokenURI(i),
               tokenContract: collectionContract.address,
+              approved: await collectionContract.isApprovedForAll(
+                address,
+                marketplaceContract.address
+              ),
+              collectionName: await collectionContract.name(),
             })
           }
         }
@@ -106,21 +131,57 @@ const Marketplace: NextPage = () => {
     return nfts
   }
 
-  async function sellNft() {
-    // if (signer instanceof Signer) {
-    //   const options = {
-    //     value: nestingContract.pricePerMint(),
-    //   }
-    //   const tx = await nestingContract
-    //     .connect(signer)
-    //     .mint(await signer.getAddress(), 1, options)
-    //
-    //   addRecentTransaction({
-    //     hash: tx.hash,
-    //     description: "Minting a new RMRK NFT",
-    //     confirmations: 1,
-    //   })
-    // }
+  async function sellNft(
+    tokenContractAddress: string,
+    tokenId: number,
+    price: number
+  ) {
+    if (signer instanceof Signer) {
+      console.log(
+        marketplaceContract.address +
+          " " +
+          tokenContractAddress +
+          " " +
+          tokenId +
+          " " +
+          price +
+          " " +
+          (await signer.getAddress()) +
+          " " +
+          Date.now()
+      )
+      const listing = {
+        assetContract: tokenContractAddress,
+        tokenId: tokenId,
+        // when should the listing open up for offers
+        startTime: Date.now() + 100000000,
+        // how long the listing will be open for
+        secondsUntilEndTime: 86400,
+        quantityToList: 1,
+        // address of the currency contract that will be used to pay for the listing
+        currencyToAccept: "0x0000000000000000000000000000000000000802",
+        // currencyToAccept: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", for native ETH
+        // how much the asset will be sold for
+        reservePricePerToken: ethers.utils.parseEther(price.toString()),
+        buyoutPricePerToken: ethers.utils.parseEther(price.toString()),
+        listingType: 0,
+      }
+
+      const tx = await marketplaceContract
+        .connect(signer)
+        .createListing(listing)
+
+      const receipt = tx.receipt // the transaction receipt
+      const listingId = tx.id // the id of the newly created listing
+
+      addRecentTransaction({
+        hash: tx.hash,
+        description: "Listing a new RMRK NFT",
+        confirmations: 1,
+      })
+
+      await tx.wait(1)
+    }
   }
 
   function fetchData() {
@@ -140,6 +201,28 @@ const Marketplace: NextPage = () => {
     fetchData()
   }, [signer])
 
+  async function approveNft(tokenContractAddress: string, tokenId: number) {
+    if (signer instanceof Signer) {
+      const tokenContract = new Contract(
+        tokenContractAddress,
+        erc721ABI,
+        provider
+      )
+
+      const tx = await tokenContract
+        .connect(signer)
+        .setApprovalForAll(marketplaceContract.address, true)
+
+      addRecentTransaction({
+        hash: tx.hash,
+        description: "Approving NFT collection for sale",
+        confirmations: 1,
+      })
+
+      await tx.wait(1)
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -157,19 +240,6 @@ const Marketplace: NextPage = () => {
 
         <p className="mb-4">Buy or Sell NFTs on the RMRK Marketplace:</p>
 
-        <div className="form-control w-full max-w-xs mb-2">
-          <label className="label">
-            <span className="label-text">Price per NFT mint (in wei)</span>
-          </label>
-          <input
-            inputMode="numeric"
-            placeholder="Price"
-            className="input input-bordered w-full max-w-xs my-0.5"
-            value={priceInput}
-            onChange={handlePriceInput}
-          ></input>
-        </div>
-
         <p className="mt-5">
           Your RMRK NFT Contract will be deployed on the Moonbase Alpha testnet.{" "}
         </p>
@@ -180,13 +250,54 @@ const Marketplace: NextPage = () => {
         <div className="flex flex-wrap justify-center">
           {ownedNfts?.map((nft, index) => {
             return (
-              <div key={index}>
+              <div className="mx-0.5" key={index}>
                 <Nft
                   tokenContract={nft.tokenContract}
+                  collectionName={nft.collectionName}
                   tokenId={nft.tokenId}
                   tokenUri={nft.tokenUri}
                   tokenType={"contract"}
                 />
+                <div className="form-control mb-2">
+                  <label className="label">Sale price</label>
+                  <input
+                    inputMode="numeric"
+                    pattern="[0-9]+([\.,][0-9]+)?"
+                    step="0.0001"
+                    placeholder="Sale price"
+                    className="input input-bordered input-sm"
+                    value={priceInput}
+                    onChange={handlePriceInput}
+                  ></input>
+                  {!nft.approved && (
+                    <button
+                      onClick={() => {
+                        approveNft(nft.tokenContract, nft.tokenId).then(() => {
+                          fetchData()
+                        })
+                      }}
+                      className="btn btn-primary btn-sm mx-2 my-2"
+                    >
+                      Approve NFT for sale
+                    </button>
+                  )}
+                  {nft.approved && (
+                    <button
+                      onClick={() => {
+                        sellNft(
+                          nft.tokenContract,
+                          nft.tokenId,
+                          priceInput
+                        ).then(() => {
+                          // fetchData()
+                        })
+                      }}
+                      className="btn btn-primary btn-sm mx-2 my-2 "
+                    >
+                      Sell NFT
+                    </button>
+                  )}
+                </div>
               </div>
             )
           })}
@@ -200,8 +311,8 @@ const Marketplace: NextPage = () => {
             return (
               <div key={index}>
                 <Nft
-                  //TODO add collection name in the NFT card component
                   tokenContract={nft.tokenContract}
+                  collectionName={nft.collectionName}
                   tokenId={nft.tokenId}
                   tokenUri={nft.tokenUri}
                   tokenType={"contract"}

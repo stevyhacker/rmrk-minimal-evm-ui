@@ -4,6 +4,7 @@ import Link from "next/link"
 
 const Nft = (props: {
   tokenContract: string
+  collectionName: string
   tokenId: number
   tokenUri: string
   tokenType: string
@@ -11,14 +12,19 @@ const Nft = (props: {
   return (
     <Link
       href={
-        "/" + props.tokenType + "/" +
+        "/" +
+        props.tokenType +
+        "/" +
         `${encodeURIComponent(props.tokenContract)}/${encodeURIComponent(
           props.tokenId
         )}`
       }
     >
       <div className={styles.card}>
-        <p className={styles.description}>Token ID: {props.tokenId}</p>
+        {props.collectionName && (
+          <p className="text-lg m-0.5">{props.collectionName}</p>
+        )}
+        <p className="text-lg m-0.5">Token ID: {props.tokenId}</p>
         <Image
           src={"https://ipfs.io/ipfs/" + props.tokenUri}
           width={50}
