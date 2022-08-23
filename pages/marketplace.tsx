@@ -15,6 +15,7 @@ import abis from "../abis/abis"
 import {
   marketplaceContractDetails,
   multiResourceFactoryContractDetails,
+  NATIVE_ETH,
   nestingFactoryContractDetails,
 } from "../constants"
 import Nft from "../components/nft"
@@ -26,6 +27,18 @@ interface NftData {
   tokenContract: string
   collectionName: string
   approved: boolean
+}
+
+interface ListingData {
+  listingId: number
+  tokenId: number
+  owner: string
+  tokenUri: string
+  tokenContract: string
+  collectionName: string
+  approved: boolean
+  saleStartTime: string
+  saleEndTime: string
   price: any
 }
 
@@ -37,7 +50,7 @@ const Marketplace: NextPage = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [priceInput, setPriceInput] = useState<number>(0)
   const [ownedNfts, setOwnedNfts] = useState<NftData[]>([])
-  const [listedNfts, setListedNfts] = useState<NftData[]>([])
+  const [listedNfts, setListedNfts] = useState<ListingData[]>([])
 
   const marketplaceContract = useContract({
     ...marketplaceContractDetails,
@@ -59,22 +72,25 @@ const Marketplace: NextPage = () => {
   }
 
   async function getListedNfts() {
-    const nfts: NftData[] = []
+    const nfts: ListingData[] = []
     const totalListings = await marketplaceContract.totalListings()
     for (let i = 0; i < totalListings; i++) {
       const nft = await marketplaceContract.listings(i)
       const tokenContract = new Contract(nft[2], erc721ABI, provider)
       nfts.push({
-        tokenId: nft[3].toNumber(),
+        listingId: nft[0].toNumber(),
         owner: nft[1],
-        tokenUri: await tokenContract.tokenURI(nft[3]),
         tokenContract: nft[2],
+        tokenId: nft[3].toNumber(),
+        tokenUri: await tokenContract.tokenURI(nft[3]),
+        saleStartTime: nft[4].toString(),
+        saleEndTime: nft[5].toString(),
         approved: await tokenContract.isApprovedForAll(
           address,
           marketplaceContract.address
         ),
         collectionName: await tokenContract.name(),
-        price: ethers.utils.formatEther(nft[9]),
+        price: nft[9],
       })
     }
     return nfts
@@ -125,13 +141,22 @@ const Marketplace: NextPage = () => {
                 marketplaceContract.address
               ),
               collectionName: await collectionContract.name(),
-              price: 0,
             })
           }
         }
       }
     }
     return nfts
+  }
+
+  function formatTime(time: string) {
+    const dtFormat = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "UTC",
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
+
+    return dtFormat.format(new Date(time * 1e3))
   }
 
   async function sellNft(
@@ -173,13 +198,13 @@ const Marketplace: NextPage = () => {
         assetContract: tokenContractAddress,
         tokenId: tokenId,
         // when should the listing open up for offers
-        startTime: Date.now(),
+        startTime: Math.floor(Date.now() / 1000) + 120,
         // how long the listing will be open for
-        secondsUntilEndTime: 1 * 24 * 60 * 60,
+        secondsUntilEndTime: 7 * 24 * 60 * 60,
         quantityToList: 1,
         // address of the currency contract that will be used to pay for the listing
         // currencyToAccept: "0x0000000000000000000000000000000000000802",
-        currencyToAccept: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", // for native ETH
+        currencyToAccept: NATIVE_ETH, // for native ETH
         // how much the asset will be sold for
         reservePricePerToken: ethers.utils.parseEther(price.toString()),
         buyoutPricePerToken: ethers.utils.parseEther(price.toString()),
@@ -204,6 +229,27 @@ const Marketplace: NextPage = () => {
 
       await tx.wait(1)
     }
+  }
+
+  async function buyNft(
+    listingId: number,
+    tokenContractAddress: string,
+    tokenId: number,
+    price: number
+  ) {
+    const options = { value: price }
+
+    const tx = await marketplaceContract
+      .connect(signer)
+      .buy(listingId, address, 1, NATIVE_ETH, price, options)
+
+    addRecentTransaction({
+      hash: tx.hash,
+      description: "Buying a new RMRK NFT",
+      confirmations: 1,
+    })
+
+    await tx.wait(1)
   }
 
   function fetchData() {
@@ -275,7 +321,7 @@ const Marketplace: NextPage = () => {
         <div className="flex flex-wrap justify-center">
           {ownedNfts?.map((nft, index) => {
             return (
-              <div className="mx-0.5" key={index}>
+              <div className="card-bordered rounded-box m-2" key={index}>
                 <Nft
                   tokenContract={nft.tokenContract}
                   collectionName={nft.collectionName}
@@ -284,13 +330,13 @@ const Marketplace: NextPage = () => {
                   tokenType={"contract"}
                 />
                 <div className="form-control">
-                  <label className="text-sm mb-0.5 ml-2">Sale price</label>
+                  <label className="text-sm mb-0.5 ml-4">Sale price</label>
                   <input
                     inputMode="numeric"
                     pattern="[0-9]+([\.,][0-9]+)?"
                     step="0.0001"
                     placeholder="Sale price"
-                    className="input input-bordered input-sm"
+                    className="input input-bordered mx-2 input-sm"
                     value={priceInput}
                     onChange={handlePriceInput}
                   ></input>
@@ -334,7 +380,7 @@ const Marketplace: NextPage = () => {
         <div className="flex flex-wrap justify-center">
           {listedNfts?.map((nft, index) => {
             return (
-              <div key={index}>
+              <div className="card-bordered rounded-box m-2" key={index}>
                 <Nft
                   tokenContract={nft.tokenContract}
                   collectionName={nft.collectionName}
@@ -342,17 +388,36 @@ const Marketplace: NextPage = () => {
                   tokenUri={nft.tokenUri}
                   tokenType={"contract"}
                 />
-                <p className="text-center">Price: {nft.price} ETH</p>
                 <div className="form-control">
+                  <p className="text-center text-lg mx-2 mb-2">
+                    Price:{" "}
+                    <span className="font-semibold">
+                      {ethers.utils.formatEther(nft.price)}
+                    </span>{" "}
+                    ETH
+                  </p>
+                  <p className="text-center mx-2 mb-0.5">
+                    Sale start time:{" "}
+                    <span className="font-semibold">
+                      {formatTime(nft.saleStartTime)}
+                    </span>
+                  </p>
+                  <p className="text-center mx-2 mb-0.5">
+                    Sale end time:{" "}
+                    <span className="font-semibold">
+                      {formatTime(nft.saleEndTime)}
+                    </span>
+                  </p>
                   <button
                     onClick={() => {
-                      // buyNft(
-                      //   nft.tokenContract,
-                      //   nft.tokenId,
-                      //   priceInput
-                      // ).then(() => {
-                      //   fetchData()
-                      // })
+                      buyNft(
+                        nft.listingId,
+                        nft.tokenContract,
+                        nft.tokenId,
+                        nft.price
+                      ).then(() => {
+                        fetchData()
+                      })
                     }}
                     className="btn btn-primary btn-sm mx-2 my-2"
                   >
