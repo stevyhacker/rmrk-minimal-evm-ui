@@ -11,6 +11,7 @@ function ListNft(props: {
   const [priceInput, setPriceInput] = useState<number>(0)
 
   function handlePriceInput(e: React.ChangeEvent<HTMLInputElement>) {
+    // @ts-ignore
     setPriceInput(e.target.value)
   }
 

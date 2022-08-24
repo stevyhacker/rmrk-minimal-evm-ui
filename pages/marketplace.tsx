@@ -152,7 +152,7 @@ const Marketplace: NextPage = () => {
       timeStyle: "short",
     })
 
-    return dtFormat.format(new Date(time * 1e3))
+    return dtFormat.format(new Date(Number(time) * 1e3))
   }
 
   async function sellNft(

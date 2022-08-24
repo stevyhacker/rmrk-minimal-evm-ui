@@ -14,6 +14,7 @@ const NftList = (props: {
           return (
             <div key={index}>
               <Nft
+                collectionName={''}
                 tokenContract={props.tokenContract}
                 tokenId={nft.tokenId}
                 tokenUri={nft.tokenUri}
