@@ -6,9 +6,9 @@ import abis from './abis/abis';
 // export const RMRKMarketplaceContractAddress = '0xbdf6DB34C85669DCf090781d43b8F5391DE38DEd';
 
 // Goerli deployments
-export const RMRKMultiResourceFactoryContractAddress = '0x7ceAac56456bc4d159F27Bcc7e73583B75B61779';
-export const RMRKNestingFactoryContractAddress = '0x40b3C66b1258DcEAf5dD67CcE8Ba048Db0CD4Da4';
-export const RMRKMarketplaceContractAddress = '0x8570D89931564Ac05b1b97aB143e3f6815028740';
+export const RMRKMultiResourceFactoryContractAddress = '0x1C4a82121F64Ad8F67774f5FE53571a7b8a84531';
+export const RMRKNestingFactoryContractAddress = '0xb78a4BD9Fb46378054Ca294782d9650611e50C31';
+export const RMRKMarketplaceContractAddress = '0x3151f12E6A8e1941278b636b2E3850d1eFE37A7E';
 
 export const NATIVE_ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 

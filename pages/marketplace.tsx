@@ -19,8 +19,9 @@ import {
   nestingFactoryContractDetails,
 } from "../constants"
 import Nft from "../components/nft"
+import ListNft from "../components/list-nft"
 
-interface NftData {
+export interface NftData {
   tokenId: number
   owner: string
   tokenUri: string
@@ -29,7 +30,7 @@ interface NftData {
   approved: boolean
 }
 
-interface ListingData {
+export interface ListingData {
   listingId: number
   tokenId: number
   owner: string
@@ -48,7 +49,6 @@ const Marketplace: NextPage = () => {
   const { address, isConnected } = useAccount()
   const addRecentTransaction = useAddRecentTransaction()
   const [loading, setLoading] = useState<boolean>(true)
-  const [priceInput, setPriceInput] = useState<number>(0)
   const [ownedNfts, setOwnedNfts] = useState<NftData[]>([])
   const [listedNfts, setListedNfts] = useState<ListingData[]>([])
 
@@ -66,10 +66,6 @@ const Marketplace: NextPage = () => {
     ...multiResourceFactoryContractDetails,
     signerOrProvider: signer,
   })
-
-  function handlePriceInput(e: React.ChangeEvent<HTMLInputElement>) {
-    setPriceInput(e.target.value)
-  }
 
   async function getListedNfts() {
     const nfts: ListingData[] = []
@@ -239,6 +235,8 @@ const Marketplace: NextPage = () => {
   ) {
     const options = { value: price }
 
+    console.log("Listing ID: " + listingId)
+
     const tx = await marketplaceContract
       .connect(signer)
       .buy(listingId, address, 1, NATIVE_ETH, price, options)
@@ -321,55 +319,22 @@ const Marketplace: NextPage = () => {
         <div className="flex flex-wrap justify-center">
           {ownedNfts?.map((nft, index) => {
             return (
-              <div className="card-bordered rounded-box m-2" key={index}>
-                <Nft
-                  tokenContract={nft.tokenContract}
-                  collectionName={nft.collectionName}
-                  tokenId={nft.tokenId}
-                  tokenUri={nft.tokenUri}
-                  tokenType={"contract"}
-                />
-                <div className="form-control">
-                  <label className="text-sm mb-0.5 ml-4">Sale price</label>
-                  <input
-                    inputMode="numeric"
-                    pattern="[0-9]+([\.,][0-9]+)?"
-                    step="0.0001"
-                    placeholder="Sale price"
-                    className="input input-bordered mx-2 input-sm"
-                    value={priceInput}
-                    onChange={handlePriceInput}
-                  ></input>
-                  {!nft.approved && (
-                    <button
-                      onClick={() => {
-                        approveNft(nft.tokenContract, nft.tokenId).then(() => {
-                          fetchData()
-                        })
-                      }}
-                      className="btn btn-primary btn-sm mx-2 my-2"
-                    >
-                      Approve NFT for sale
-                    </button>
-                  )}
-                  {nft.approved && (
-                    <button
-                      onClick={() => {
-                        sellNft(
-                          nft.tokenContract,
-                          nft.tokenId,
-                          priceInput
-                        ).then(() => {
-                          fetchData()
-                        })
-                      }}
-                      className="btn btn-primary btn-sm mx-2 my-2 "
-                    >
-                      Sell NFT
-                    </button>
-                  )}
-                </div>
-              </div>
+              <ListNft
+                key={index}
+                nft={nft}
+                approveOnClick={() => {
+                  approveNft(nft.tokenContract, nft.tokenId).then(() => {
+                    fetchData()
+                  })
+                }}
+                buyOnClick={(priceInput) => {
+                  sellNft(nft.tokenContract, nft.tokenId, priceInput).then(
+                    () => {
+                      fetchData()
+                    }
+                  )
+                }}
+              />
             )
           })}
         </div>
