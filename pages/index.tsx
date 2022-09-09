@@ -26,11 +26,6 @@ const Home: NextPage = () => {
         <p className={styles.description}>
           To get started try one of these and mint an NFT:
         </p>
-        <h2 className={styles.description}>
-          <Link href="/nesting">Nesting </Link>
-          or
-          <Link href="/multi-resource"> Multi-resource</Link>
-        </h2>
 
         <div className={styles.grid}>
           <Link href="/nesting" className={styles.card}>
@@ -54,7 +49,7 @@ const Home: NextPage = () => {
             </div>
           </Link>
 
-          <Link href="/equippable" >
+          <Link href="/equipppable" >
             <div className={styles.card}>
               <h2>Equippable NFTs Demo &rarr;</h2>
               <p>Equip items to your NFT characters.</p>

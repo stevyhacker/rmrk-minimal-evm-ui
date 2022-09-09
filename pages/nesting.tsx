@@ -22,6 +22,8 @@ const Nesting: NextPage = () => {
   const [rmrkCollections, setRmrkCollections] = useState<string[]>([])
   const [nameInput, setNameInput] = useState<string>("Test Collection")
   const [symbolInput, setSymbolInput] = useState<string>("TEST")
+  const [collectionMetadataInput, setCollectionMetadataInput] =
+    useState<string>("")
   const [maxSupplyInput, setSupplyInput] = useState<number>(10000)
   const [priceInput, setPriceInput] = useState<number>(0)
   const [ownedNfts, setOwnedNfts] = useState<
@@ -38,6 +40,10 @@ const Nesting: NextPage = () => {
 
   function handleSymbolInput(e: React.ChangeEvent<HTMLInputElement>) {
     setSymbolInput(e.target.value)
+  }
+
+  function handleMetadataInput(e: React.ChangeEvent<HTMLInputElement>) {
+    setCollectionMetadataInput(e.target.value)
   }
 
   function handleMaxSupplyInput(e: React.ChangeEvent<HTMLInputElement>) {
@@ -110,7 +116,7 @@ const Nesting: NextPage = () => {
     if (signer instanceof Signer) {
       const tx = await factoryContract
         .connect(signer)
-        .deployRMRKNesting(nameInput, symbolInput, maxSupplyInput, priceInput)
+        .deployRMRKNesting(nameInput, symbolInput, maxSupplyInput, priceInput, collectionMetadataInput)
 
       addRecentTransaction({
         hash: tx.hash,
@@ -219,6 +225,16 @@ const Nesting: NextPage = () => {
             className="input input-bordered w-full max-w-xs my-0.5"
             value={priceInput}
             onChange={handlePriceInput}
+          ></input>
+          <label className="label">
+            <span className="label-text">Collection Metadata URI</span>
+          </label>
+          <input
+            inputMode="text"
+            placeholder="Collection metadata URI"
+            className="input input-bordered w-full max-w-xs my-0.5"
+            value={collectionMetadataInput}
+            onChange={handleMetadataInput}
           ></input>
         </div>
 
