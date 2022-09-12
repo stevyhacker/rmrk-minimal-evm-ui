@@ -8,6 +8,7 @@ import abis from './abis/abis';
 // Goerli deployments
 export const RMRKMultiResourceFactoryContractAddress = '0x35599CfFCdC8Bb29e77e316Be974D31B6a932eD2';
 export const RMRKNestingFactoryContractAddress = '0xa8660beBD6F526bd6614983E98eB95E7905C822A';
+export const RMRKEquippableFactoryContractAddress = '0xAC655Fd14a175fDE5B2e66e66Ba0Ae67164025e7';
 export const RMRKMarketplaceContractAddress = '0x3151f12E6A8e1941278b636b2E3850d1eFE37A7E';
 
 export const NATIVE_ETH = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -23,6 +24,11 @@ export const multiResourceFactoryContractDetails = {
 export const nestingFactoryContractDetails = {
   addressOrName: RMRKNestingFactoryContractAddress,
   contractInterface: abis.nestingFactoryAbi,
+};
+
+export const equippableFactoryContractDetails = {
+  addressOrName: RMRKEquippableFactoryContractAddress,
+  contractInterface: abis.equippableFactoryAbi,
 };
 
 export const marketplaceContractDetails = {
